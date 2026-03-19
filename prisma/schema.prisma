@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CertificateStatus {
+  PENDING
+  ISSUED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  student Student?
+  teacher Teacher?
+}
+
+model Student {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  track     String
+  createdAt DateTime @default(now())
+
+  user              User               @relation(fields: [userId], references: [id])
+  submissions       Submission[]
+  certificates      Certificate[]
+  attendanceRecords AttendanceRecord[]
+}
+
+model Teacher {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  track     String
+  createdAt DateTime @default(now())
+
+  user               User                @relation(fields: [userId], references: [id])
+  attendanceSessions AttendanceSession[]
+}
+
+model Resource {
+  id        String   @id @default(cuid())
+  title     String
+  track     String
+  fileUrl   String
+  createdAt DateTime @default(now())
+}
+
+model Submission {
+  id        String           @id @default(cuid())
+  studentId String
+  title     String
+  fileUrl   String
+  status    SubmissionStatus @default(PENDING)
+  remark    String?
+  createdAt DateTime         @default(now())
+
+  student Student @relation(fields: [studentId], references: [id])
+}
+
+model Certificate {
+  id            String            @id @default(cuid())
+  studentId     String
+  certificateId String?           @unique
+  status        CertificateStatus @default(PENDING)
+  issuedAt      DateTime?
+  createdAt     DateTime          @default(now())
+
+  student Student @relation(fields: [studentId], references: [id])
+}
+
+model AttendanceSession {
+  id        String   @id @default(cuid())
+  title     String
+  track     String
+  teacherId String
+  code      String
+  isActive  Boolean  @default(true)
+  startsAt  DateTime
+  endsAt    DateTime
+  createdAt DateTime @default(now())
+
+  teacher           Teacher             @relation(fields: [teacherId], references: [id])
+  attendanceRecords AttendanceRecord[]
+
+  @@unique([track, code])
+}
+
+model AttendanceRecord {
+  id          String           @id @default(cuid())
+  sessionId   String
+  studentId   String
+  status      AttendanceStatus @default(PRESENT)
+  checkedInAt DateTime         @default(now())
+  createdAt   DateTime         @default(now())
+
+  session AttendanceSession @relation(fields: [sessionId], references: [id])
+  student Student           @relation(fields: [studentId], references: [id])
+
+  @@unique([sessionId, studentId])
+}
