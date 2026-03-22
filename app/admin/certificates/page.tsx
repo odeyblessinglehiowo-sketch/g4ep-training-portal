@@ -1,4 +1,5 @@
 import { requireRole } from "@/lib/auth";
+export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { getStudentAttendanceMetrics } from "@/lib/student-progress";
 import { issueCertificate } from "./actions";

@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+export const dynamic = "force-dynamic";
 import { createResource } from "./actions";
 
 export default async function AdminResourcesPage() {

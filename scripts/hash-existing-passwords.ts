@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { PrismaClient } from "@prisma/client";
-
+export const dynamic = "force-dynamic";
 const prisma = new PrismaClient();
 
 async function main() {

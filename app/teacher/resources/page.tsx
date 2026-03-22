@@ -1,7 +1,7 @@
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { createTeacherResource } from "./actions";
-
+export const dynamic = "force-dynamic";
 export default async function TeacherResourcesPage() {
   const currentUser = await requireRole("TEACHER");
 

@@ -35,41 +35,37 @@ export async function syncExpiredAttendanceSessions() {
       },
     });
 
-    const existingStudentIds = new Set(
-      existingRecords.map((record) => record.studentId)
-    );
+    const existingStudentIds = new Set(existingRecords.map((record) => record.studentId));
 
-    const absentStudents = studentsInTrack.filter(
-      (student) => !existingStudentIds.has(student.id)
-    );
+    const absentStudents = studentsInTrack
+      .filter((student) => !existingStudentIds.has(student.id))
+      .map((student) => ({
+        sessionId: session.id,
+        studentId: student.id,
+        status: "ABSENT" as const,
+      }));
 
-    await db.$transaction(async (tx) => {
-      for (const student of absentStudents) {
-        await tx.attendanceRecord.create({
-          data: {
-            sessionId: session.id,
-            studentId: student.id,
-            status: "ABSENT",
-          },
-        });
-      }
-
-      await tx.attendanceSession.update({
+    await db.$transaction([
+      ...(absentStudents.length > 0
+        ? [
+           db.attendanceRecord.createMany({
+  data: absentStudents,
+})
+          ]
+        : []),
+      db.attendanceSession.update({
         where: {
           id: session.id,
         },
         data: {
           isActive: false,
         },
-      });
-    });
+      }),
+    ]);
   }
 }
 
-export async function markAttendanceByCodeForStudent(
-  userId: string,
-  code: string
-) {
+export async function markAttendanceByCodeForStudent(userId: string, code: string) {
   await syncExpiredAttendanceSessions();
 
   const studentUser = await db.user.findUnique({

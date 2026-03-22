@@ -1,5 +1,6 @@
 import QRCode from "qrcode";
 import { requireRole } from "@/lib/auth";
+export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { syncExpiredAttendanceSessions } from "@/lib/attendance";
 import { createAttendanceSession } from "./actions";
