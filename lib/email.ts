@@ -8,7 +8,7 @@ async function sendEmailOrThrow(payload: {
   html: string;
 }) {
   const { data, error } = await resend.emails.send({
-    from: "G4EP Portal <onboarding@resend.dev>",
+   from: "G4EP Portal <portal@geeeep.com.ng>",
     to: payload.to,
     subject: payload.subject,
     html: payload.html,
