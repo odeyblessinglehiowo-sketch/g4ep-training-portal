@@ -5,12 +5,29 @@ import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 
+function buildProfileRedirect(params: {
+  updated?: "profile" | "password";
+  error?: string;
+}) {
+  const searchParams = new URLSearchParams();
+
+  if (params.updated) {
+    searchParams.set("updated", params.updated);
+  }
+
+  if (params.error) {
+    searchParams.set("error", params.error);
+  }
+
+  return `/student/profile?${searchParams.toString()}`;
+}
+
 export async function updateStudentProfile(formData: FormData) {
   const name = formData.get("name")?.toString().trim();
   const email = formData.get("email")?.toString().trim().toLowerCase();
 
   if (!name || !email) {
-    throw new Error("Name and email are required.");
+    redirect(buildProfileRedirect({ error: "Name and email are required." }));
   }
 
   const currentUser = await requireRole("STUDENT");
@@ -25,7 +42,11 @@ export async function updateStudentProfile(formData: FormData) {
   });
 
   if (existingUser) {
-    throw new Error("This email is already in use by another account.");
+    redirect(
+      buildProfileRedirect({
+        error: "This email is already in use by another account.",
+      })
+    );
   }
 
   await db.user.update({
@@ -38,7 +59,7 @@ export async function updateStudentProfile(formData: FormData) {
     },
   });
 
-  redirect("/student/profile?updated=profile");
+  redirect(buildProfileRedirect({ updated: "profile" }));
 }
 
 export async function changeStudentPassword(formData: FormData) {
@@ -47,15 +68,27 @@ export async function changeStudentPassword(formData: FormData) {
   const confirmPassword = formData.get("confirmPassword")?.toString().trim();
 
   if (!currentPassword || !newPassword || !confirmPassword) {
-    throw new Error("All password fields are required.");
+    redirect(
+      buildProfileRedirect({
+        error: "All password fields are required.",
+      })
+    );
   }
 
   if (newPassword.length < 6) {
-    throw new Error("New password must be at least 6 characters long.");
+    redirect(
+      buildProfileRedirect({
+        error: "New password must be at least 6 characters long.",
+      })
+    );
   }
 
   if (newPassword !== confirmPassword) {
-    throw new Error("New password and confirm password do not match.");
+    redirect(
+      buildProfileRedirect({
+        error: "New password and confirm password do not match.",
+      })
+    );
   }
 
   const currentUser = await requireRole("STUDENT");
@@ -67,13 +100,21 @@ export async function changeStudentPassword(formData: FormData) {
   });
 
   if (!user) {
-    throw new Error("User account not found.");
+    redirect(
+      buildProfileRedirect({
+        error: "User account not found.",
+      })
+    );
   }
 
   const passwordMatch = await bcrypt.compare(currentPassword, user.password);
 
   if (!passwordMatch) {
-    throw new Error("Current password is incorrect.");
+    redirect(
+      buildProfileRedirect({
+        error: "Current password is incorrect.",
+      })
+    );
   }
 
   const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -87,5 +128,5 @@ export async function changeStudentPassword(formData: FormData) {
     },
   });
 
-  redirect("/student/profile?updated=password");
+  redirect(buildProfileRedirect({ updated: "password" }));
 }

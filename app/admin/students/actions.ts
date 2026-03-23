@@ -25,6 +25,7 @@ function buildStudentsRedirect(params: {
   error?: string;
   email?: string;
   password?: string;
+  emailSent?: string;
   name?: string;
   trackName?: string;
   q?: string;
@@ -37,6 +38,7 @@ function buildStudentsRedirect(params: {
   if (params.error) searchParams.set("error", params.error);
   if (params.email) searchParams.set("email", params.email);
   if (params.password) searchParams.set("password", params.password);
+  if (params.emailSent) searchParams.set("emailSent", params.emailSent);
   if (params.name) searchParams.set("name", params.name);
   if (params.trackName) searchParams.set("trackName", params.trackName);
   if (params.q) searchParams.set("q", params.q);
@@ -78,7 +80,11 @@ export async function createStudent(formData: FormData) {
   const track = formData.get("track")?.toString().trim();
 
   if (!name || !email || !track) {
-    throw new Error("Name, email, and track are required.");
+    redirect(
+      buildStudentsRedirect({
+        error: "Name, email, and track are required.",
+      })
+    );
   }
 
   const existingUser = await db.user.findUnique({
@@ -86,7 +92,11 @@ export async function createStudent(formData: FormData) {
   });
 
   if (existingUser) {
-    throw new Error("A user with this email already exists.");
+    redirect(
+      buildStudentsRedirect({
+        error: "A user with this email already exists.",
+      })
+    );
   }
 
   const temporaryPassword = generateTemporaryPassword();
@@ -113,12 +123,19 @@ export async function createStudent(formData: FormData) {
     },
   });
 
-  await sendAccountEmail({
-    name,
-    email,
-    password: temporaryPassword,
-    role: "Student",
-  });
+  let emailSent = "0";
+
+  try {
+    await sendAccountEmail({
+      name,
+      email,
+      password: temporaryPassword,
+      role: "Student",
+    });
+    emailSent = "1";
+  } catch (error) {
+    console.error("Student account email failed:", error);
+  }
 
   revalidatePath("/admin/students");
   revalidatePath("/admin/certificates");
@@ -128,6 +145,7 @@ export async function createStudent(formData: FormData) {
       created: "1",
       email,
       password: temporaryPassword,
+      emailSent,
     })
   );
 }
@@ -257,6 +275,7 @@ export async function issueCertificatesByTrack(formData: FormData) {
           createdAt: "desc",
         },
       },
+      user: true,
     },
   });
 

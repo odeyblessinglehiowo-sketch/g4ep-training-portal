@@ -1,6 +1,8 @@
+import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
-export const dynamic = "force-dynamic";
 import { createTeacher } from "./actions";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminTeachersPage({
   searchParams,
@@ -9,8 +11,12 @@ export default async function AdminTeachersPage({
     created?: string;
     email?: string;
     password?: string;
+    emailSent?: string;
+    error?: string;
   }>;
 }) {
+  await requireRole("ADMIN");
+
   const params = await searchParams;
 
   const teachers = await db.teacher.findMany({
@@ -25,6 +31,8 @@ export default async function AdminTeachersPage({
   const created = params.created === "1";
   const createdEmail = params.email;
   const createdPassword = params.password;
+  const emailSent = params.emailSent === "1";
+  const error = params.error;
 
   return (
     <main className="space-y-6">
@@ -42,6 +50,15 @@ export default async function AdminTeachersPage({
         </p>
       </section>
 
+      {error && (
+        <section className="rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm">
+          <h2 className="text-lg font-bold text-red-800">
+            Action could not be completed
+          </h2>
+          <p className="mt-2 text-sm text-slate-700">{error}</p>
+        </section>
+      )}
+
       {created && createdEmail && createdPassword && (
         <section className="rounded-3xl border border-green-200 bg-green-50 p-6 shadow-sm">
           <h2 className="text-lg font-bold text-green-800">
@@ -51,6 +68,22 @@ export default async function AdminTeachersPage({
           <p className="mt-2 text-sm text-slate-700">
             Share these login details with the teacher.
           </p>
+
+          {!emailSent && (
+            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+              <p className="text-sm font-medium text-amber-800">
+                Email was not sent. Copy these details manually and share them with the teacher.
+              </p>
+            </div>
+          )}
+
+          {emailSent && (
+            <div className="mt-4 rounded-2xl border border-green-200 bg-white px-4 py-3 ring-1 ring-green-100">
+              <p className="text-sm font-medium text-green-700">
+                Login details were sent successfully to the teacher&apos;s email.
+              </p>
+            </div>
+          )}
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl bg-white p-4 ring-1 ring-green-100">

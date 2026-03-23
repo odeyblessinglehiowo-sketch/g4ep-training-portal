@@ -1,6 +1,5 @@
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
-export const dynamic = "force-dynamic";
 import {
   createStudent,
   issueCertificatesByTrack,
@@ -9,6 +8,8 @@ import {
 import { toggleUserStatus } from "../users/actions";
 import { getStudentAttendanceMetrics } from "@/lib/student-progress";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminStudentsPage({
   searchParams,
 }: {
@@ -16,6 +17,7 @@ export default async function AdminStudentsPage({
     created?: string;
     email?: string;
     password?: string;
+    emailSent?: string;
     success?: string;
     error?: string;
     name?: string;
@@ -33,11 +35,7 @@ export default async function AdminStudentsPage({
   const students = await db.student.findMany({
     where: {
       AND: [
-        track !== "ALL"
-          ? {
-              track,
-            }
-          : {},
+        track !== "ALL" ? { track } : {},
         q
           ? {
               OR: [
@@ -97,6 +95,7 @@ export default async function AdminStudentsPage({
   const created = params.created === "1";
   const createdEmail = params.email;
   const createdPassword = params.password;
+  const emailSent = params.emailSent === "1";
   const success = params.success;
   const successName = params.name;
   const successTrackName = params.trackName;
@@ -136,6 +135,22 @@ export default async function AdminStudentsPage({
           <p className="mt-2 text-sm text-slate-700">
             Share these login details with the student.
           </p>
+
+          {!emailSent && (
+            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+              <p className="text-sm font-medium text-amber-800">
+                Email was not sent. Copy these details manually and share them with the student.
+              </p>
+            </div>
+          )}
+
+          {emailSent && (
+            <div className="mt-4 rounded-2xl border border-green-200 bg-white px-4 py-3 ring-1 ring-green-100">
+              <p className="text-sm font-medium text-green-700">
+                Login details were sent successfully to the student&apos;s email.
+              </p>
+            </div>
+          )}
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl bg-white p-4 ring-1 ring-green-100">
@@ -262,23 +277,23 @@ export default async function AdminStudentsPage({
               Reset
             </a>
           </div>
+        </form>
 
-          <form action={issueCertificatesByTrack} className="contents">
-            <input type="hidden" name="selectedTrack" value={track} />
-            <input type="hidden" name="q" value={q} />
-            <input type="hidden" name="track" value={track} />
-            <button
-              type="submit"
-              disabled={track === "ALL"}
-              className={`rounded-xl px-5 py-3 font-semibold text-white ${
-                track === "ALL"
-                  ? "cursor-not-allowed bg-slate-400"
-                  : "bg-slate-900 hover:bg-slate-800"
-              }`}
-            >
-              Issue All in Selected Track
-            </button>
-          </form>
+        <form action={issueCertificatesByTrack} className="mt-4">
+          <input type="hidden" name="selectedTrack" value={track} />
+          <input type="hidden" name="q" value={q} />
+          <input type="hidden" name="track" value={track} />
+          <button
+            type="submit"
+            disabled={track === "ALL"}
+            className={`rounded-xl px-5 py-3 font-semibold text-white ${
+              track === "ALL"
+                ? "cursor-not-allowed bg-slate-400"
+                : "bg-slate-900 hover:bg-slate-800"
+            }`}
+          >
+            Issue All in Selected Track
+          </button>
         </form>
       </section>
 
@@ -330,6 +345,7 @@ export default async function AdminStudentsPage({
                     <form action={toggleUserStatus}>
                       <input type="hidden" name="userId" value={student.user.id} />
                       <button
+                        type="submit"
                         className={`rounded-lg px-3 py-1 text-xs font-semibold ${
                           student.user.isActive
                             ? "bg-red-100 text-red-700"

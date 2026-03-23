@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 function generateTemporaryPassword(length = 8) {
   const chars =
@@ -18,6 +19,24 @@ function generateTemporaryPassword(length = 8) {
   return password;
 }
 
+function buildTeachersRedirect(params: {
+  created?: string;
+  error?: string;
+  email?: string;
+  password?: string;
+  emailSent?: string;
+}) {
+  const searchParams = new URLSearchParams();
+
+  if (params.created) searchParams.set("created", params.created);
+  if (params.error) searchParams.set("error", params.error);
+  if (params.email) searchParams.set("email", params.email);
+  if (params.password) searchParams.set("password", params.password);
+  if (params.emailSent) searchParams.set("emailSent", params.emailSent);
+
+  return `/admin/teachers?${searchParams.toString()}`;
+}
+
 export async function createTeacher(formData: FormData) {
   await requireRole("ADMIN");
 
@@ -26,7 +45,11 @@ export async function createTeacher(formData: FormData) {
   const track = formData.get("track")?.toString().trim();
 
   if (!name || !email || !track) {
-    throw new Error("Name, email, and track are required.");
+    redirect(
+      buildTeachersRedirect({
+        error: "Name, email, and track are required.",
+      })
+    );
   }
 
   const existingUser = await db.user.findUnique({
@@ -34,7 +57,11 @@ export async function createTeacher(formData: FormData) {
   });
 
   if (existingUser) {
-    throw new Error("A user with this email already exists.");
+    redirect(
+      buildTeachersRedirect({
+        error: "A user with this email already exists.",
+      })
+    );
   }
 
   const temporaryPassword = generateTemporaryPassword();
@@ -56,14 +83,29 @@ export async function createTeacher(formData: FormData) {
     },
   });
 
-  await sendAccountEmail({
-    name,
-    email,
-    password: temporaryPassword,
-    role: "Teacher",
-  });
+  let emailSent = "0";
+
+  try {
+    await sendAccountEmail({
+      name,
+      email,
+      password: temporaryPassword,
+      role: "Teacher",
+    });
+    emailSent = "1";
+  } catch (error) {
+    console.error("Teacher account email failed:", error);
+  }
+
+  revalidatePath("/admin/teachers");
+  revalidatePath("/teacher/dashboard");
 
   redirect(
-    `/admin/teachers?created=1&email=${encodeURIComponent(email)}&password=${encodeURIComponent(temporaryPassword)}`
+    buildTeachersRedirect({
+      created: "1",
+      email,
+      password: temporaryPassword,
+      emailSent,
+    })
   );
 }

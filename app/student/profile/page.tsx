@@ -1,16 +1,18 @@
 import { requireRole } from "@/lib/auth";
-export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import {
   changeStudentPassword,
   updateStudentProfile,
 } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function StudentProfilePage({
   searchParams,
 }: {
   searchParams: Promise<{
     updated?: string;
+    error?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -31,6 +33,7 @@ export default async function StudentProfilePage({
 
   const student = studentUser.student;
   const updated = params.updated;
+  const error = params.error;
 
   return (
     <main className="space-y-6">
@@ -47,6 +50,15 @@ export default async function StudentProfilePage({
           View and update your student information and login details.
         </p>
       </section>
+
+      {error && (
+        <section className="rounded-3xl border border-red-200 bg-red-50 p-4 shadow-sm">
+          <p className="font-semibold text-red-800">
+            Action could not be completed
+          </p>
+          <p className="mt-1 text-sm text-slate-600">{error}</p>
+        </section>
+      )}
 
       {updated === "profile" && (
         <section className="rounded-3xl border border-green-200 bg-green-50 p-4 shadow-sm">
