@@ -2,17 +2,15 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const hostname = request.headers.get("host") ?? "";
-  const forwardedProto = request.headers.get("x-forwarded-proto");
+  const host = request.headers.get("host") ?? "";
+  const proto = request.headers.get("x-forwarded-proto") ?? "";
 
-  const isProductionDomain =
-    hostname === "portal.geeeep.com.ng" ||
-    hostname.endsWith(".up.railway.app");
+  const isCustomDomain = host === "portal.geeeep.com.ng";
 
-  if (isProductionDomain && forwardedProto === "http") {
-    const httpsUrl = new URL(request.url);
-    httpsUrl.protocol = "https:";
-    return NextResponse.redirect(httpsUrl, 301);
+  if (isCustomDomain && proto !== "https") {
+    const url = request.nextUrl.clone();
+    url.protocol = "https";
+    return NextResponse.redirect(url, 301);
   }
 
   return NextResponse.next();
