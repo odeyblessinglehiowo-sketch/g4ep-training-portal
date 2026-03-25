@@ -2,6 +2,7 @@ import LogoutButton from "@/components/logout-button";
 import Link from "next/link";
 import { ReactNode } from "react";
 import PortalFooter from "@/components/portal-footer";
+import PortalSideNav from "@/components/portal-side-nav";
 
 const navItems = [
   { name: "Dashboard", href: "/admin/dashboard", short: "Home" },
@@ -37,20 +38,7 @@ export default function AdminLayout({
             </p>
           </div>
 
-          <nav className="mt-6 space-y-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="group flex items-center justify-between rounded-2xl border border-transparent bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-emerald-100 hover:bg-emerald-50 hover:text-emerald-800"
-              >
-                <span>{item.name}</span>
-                <span className="text-emerald-600 opacity-0 transition group-hover:opacity-100">
-                  →
-                </span>
-              </Link>
-            ))}
-          </nav>
+         <PortalSideNav items={navItems} />
 
           <div className="mt-8 rounded-[1.75rem] border border-emerald-100 bg-gradient-to-r from-emerald-50 to-lime-50 p-4">
             <p className="text-sm font-semibold text-emerald-800">Admin Notice</p>
