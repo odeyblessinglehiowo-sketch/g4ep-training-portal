@@ -92,11 +92,10 @@ export default async function TeacherLayout({
             </div>
           </div>
 
-          <div className="mt-6">{children}</div>
-
-          <PortalFooter />
+          <div className="mt-5 space-y-6">{children}</div>
         </div>
       </div>
+      <PortalFooter />
     </div>
   );
 }
