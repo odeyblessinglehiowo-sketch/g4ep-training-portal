@@ -16,11 +16,11 @@ export default function Navbar() {
           <img
             src="/logo/g4ep.png"
             alt="G4EP logo"
-            className="h-11 w-11 shrink-0 rounded-full object-contain sm:h-12 sm:w-12"
+            className="h-11 w-11 shrink-0 object-contain sm:h-12 sm:w-12"
           />
 
           <div className="min-w-0">
-            <p className="text-base font-extrabold leading-tight text-emerald-700 sm:text-2xl">
+            <p className="truncate text-lg font-extrabold leading-tight text-emerald-700 sm:text-2xl">
               G4EP Project RISE
             </p>
             <p className="hidden text-xs font-medium tracking-[0.12em] text-slate-500 sm:block">
@@ -34,7 +34,7 @@ export default function Navbar() {
             <Link
               key={item.name}
               href={item.href}
-              className="rounded-xl px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+              className="rounded-lg px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
             >
               {item.name}
             </Link>
@@ -42,13 +42,13 @@ export default function Navbar() {
         </nav>
       </div>
 
-      <div className="border-t border-emerald-100 bg-white md:hidden">
-        <div className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 py-2 scrollbar-none sm:px-6">
+      <div className="border-t border-emerald-100 bg-emerald-50/70 md:hidden">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-2 sm:px-6">
           {navItems.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className="whitespace-nowrap rounded-full border border-emerald-100 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100 active:scale-[0.98]"
+              className="min-w-0 flex-1 rounded-lg px-2 py-2 text-center text-sm font-extrabold text-emerald-700 transition hover:bg-emerald-100 active:scale-[0.98]"
             >
               {item.name}
             </Link>

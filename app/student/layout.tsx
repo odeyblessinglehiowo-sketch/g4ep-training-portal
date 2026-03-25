@@ -72,12 +72,12 @@ export default async function StudentLayout({
                 </h1>
               </div>
 
-              <div className="flex items-center gap-3 self-start lg:self-auto">
-                <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
-                  Student
-                </span>
-                <LogoutButton />
-              </div>
+              <div className="flex w-full items-center justify-between gap-3 lg:w-auto lg:justify-end">
+  <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+    Student
+  </span>
+  <LogoutButton />
+</div>
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:hidden">
