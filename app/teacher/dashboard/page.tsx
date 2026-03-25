@@ -1,6 +1,8 @@
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
+
 export const dynamic = "force-dynamic";
+
 export default async function TeacherDashboardPage() {
   const currentUser = await requireRole("TEACHER");
 
@@ -51,50 +53,78 @@ export default async function TeacherDashboardPage() {
       title: "My Track",
       value: teacher.track ?? "Not Assigned",
       note: "Assigned teaching track",
+      tone: "from-emerald-600 to-green-500",
+      soft: "bg-emerald-50 border-emerald-100",
+      valueColor: "text-emerald-800",
     },
     {
       title: "Students",
-      value: totalStudents,
+      value: `${totalStudents}`,
       note: "Students under this track",
+      tone: "from-lime-500 to-emerald-500",
+      soft: "bg-lime-50 border-lime-100",
+      valueColor: "text-lime-800",
     },
     {
       title: "Resources",
-      value: totalResources,
+      value: `${totalResources}`,
       note: "Available track materials",
+      tone: "from-green-600 to-emerald-600",
+      soft: "bg-green-50 border-green-100",
+      valueColor: "text-green-800",
     },
     {
       title: "Active Attendance",
-      value: activeSessions,
-      note: "Current active attendance sessions",
+      value: `${activeSessions}`,
+      note: "Current live attendance sessions",
+      tone: "from-emerald-700 to-lime-500",
+      soft: "bg-emerald-50 border-emerald-100",
+      valueColor: "text-emerald-800",
     },
   ];
 
   return (
     <main className="space-y-6">
-      <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
-          Teacher Dashboard
-        </p>
+      <section className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-emerald-800 via-green-700 to-lime-500 p-6 text-white shadow-lg shadow-emerald-200/50 sm:p-8">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50/90">
+              Teacher Dashboard
+            </p>
 
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">
-          Welcome, {teacherUser.name ?? "Teacher"}
-        </h1>
+            <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">
+              Welcome back, {teacherUser.name ?? "Teacher"}
+            </h1>
 
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-          Manage your track attendance, monitor student submissions, and support
-          learner progress.
-        </p>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-emerald-50/90 sm:text-base">
+              Manage your learning track, support students, monitor attendance,
+              publish resources, and review project submissions from one clean
+              teaching workspace.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:w-auto">
+            <QuickLink href="/teacher/attendance" label="Attendance" />
+            <QuickLink href="/teacher/resources" label="Resources" />
+            <QuickLink href="/teacher/submissions" label="Projects" />
+            <QuickLink href="/teacher/students" label="Students" />
+          </div>
+        </div>
       </section>
 
-      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <div
             key={stat.title}
-            className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+            className={`rounded-[1.75rem] border p-5 shadow-sm ${stat.soft}`}
           >
-            <p className="text-sm font-medium text-slate-500">{stat.title}</p>
+            <div className={`h-2 w-24 rounded-full bg-gradient-to-r ${stat.tone}`} />
 
-            <h2 className="mt-4 text-3xl font-bold text-slate-900">
+            <p className="mt-5 text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
+              {stat.title}
+            </p>
+
+            <h2 className={`mt-3 text-2xl font-bold ${stat.valueColor}`}>
               {stat.value}
             </h2>
 
@@ -105,80 +135,191 @@ export default async function TeacherDashboardPage() {
         ))}
       </section>
 
-      <section className="grid gap-6 md:grid-cols-3">
-        <a
-          href="/teacher/attendance"
-          className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 transition hover:ring-green-300 active:scale-[0.98]"
-        >
-          <h3 className="text-lg font-semibold text-slate-900">
-            Start Attendance
-          </h3>
+      <section className="grid gap-6 xl:grid-cols-3">
+        <div className="rounded-[2rem] border border-emerald-100 bg-white/90 p-6 shadow-sm xl:col-span-2">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                Teaching Overview
+              </p>
+              <h3 className="mt-2 text-2xl font-bold text-slate-900">
+                Classroom Activity
+              </h3>
+            </div>
 
-          <p className="mt-2 text-sm text-slate-600">
-            Create QR session and track today&apos;s class attendance.
-          </p>
-        </a>
+            <span className="rounded-full bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.15em] text-emerald-700">
+              Active Teacher
+            </span>
+          </div>
 
-        <a
-          href="/teacher/resources"
-          className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 transition hover:ring-green-300 active:scale-[0.98]"
-        >
-          <h3 className="text-lg font-semibold text-slate-900">
-            Upload Resource
-          </h3>
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <ActionCard
+              href="/teacher/attendance"
+              title="Start Attendance"
+              text="Create a QR session and track your students' attendance in real time."
+              tint="bg-emerald-50 border-emerald-100"
+            />
 
-          <p className="mt-2 text-sm text-slate-600">
-            Share slides, PDFs, or learning materials with students.
-          </p>
-        </a>
+            <ActionCard
+              href="/teacher/resources"
+              title="Upload Resource"
+              text="Share slides, PDFs, and training materials with your assigned track."
+              tint="bg-lime-50 border-lime-100"
+            />
 
-        <a
-          href="/teacher/submissions"
-          className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 transition hover:ring-green-300 active:scale-[0.98]"
-        >
-          <h3 className="text-lg font-semibold text-slate-900">
-            Review Projects
-          </h3>
+            <ActionCard
+              href="/teacher/submissions"
+              title="Review Projects"
+              text="Approve, reject, and manage student submissions efficiently."
+              tint="bg-green-50 border-green-100"
+            />
+          </div>
 
-          <p className="mt-2 text-sm text-slate-600">
-            Approve or reject student submissions.
-          </p>
-        </a>
-      </section>
+          <div className="mt-6 rounded-[1.75rem] border border-emerald-100 bg-emerald-50/60 p-5">
+            <h4 className="text-lg font-bold text-slate-900">Find Student</h4>
+            <p className="mt-2 text-sm text-slate-600">
+              Quickly search students in your track.
+            </p>
 
-      <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <h3 className="text-xl font-bold text-slate-900">Find Student</h3>
-
-          <p className="mt-2 text-sm text-slate-600">
-            Quickly search students in your track.
-          </p>
-
-          <input
-            type="text"
-            placeholder="Search student name..."
-            className="mt-4 w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-green-700"
-          />
+            <input
+              type="text"
+              placeholder="Search student name..."
+              className="mt-4 w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm outline-none transition focus:border-emerald-500"
+            />
+          </div>
         </div>
 
-        <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <h3 className="text-xl font-bold text-slate-900">Recent Activity</h3>
+        <div className="space-y-6">
+          <div className="rounded-[2rem] border border-emerald-100 bg-white/90 p-6 shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
+              Recent Activity
+            </p>
 
-          <div className="mt-4 space-y-3 text-sm text-slate-600">
-            <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-              📚 New resource uploaded
+            <div className="mt-5 space-y-4">
+              <ActivityItem
+                title="New resource uploaded"
+                text="Fresh training materials can now be accessed by students in your track."
+                tint="bg-emerald-50 border-emerald-100"
+              />
+
+              <ActivityItem
+                title="Student submitted project"
+                text="A learner submission is awaiting your review in the projects section."
+                tint="bg-lime-50 border-lime-100"
+              />
+
+              <ActivityItem
+                title="Attendance session created"
+                text="Your attendance workflow is ready for the next live class session."
+                tint="bg-green-50 border-green-100"
+              />
             </div>
+          </div>
 
-            <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-              🧑‍🎓 Student submitted project
-            </div>
+          <div className="rounded-[2rem] border border-emerald-100 bg-gradient-to-br from-emerald-600 via-green-600 to-lime-500 p-6 text-white shadow-md">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-50/90">
+              Quick Actions
+            </p>
 
-            <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-              📅 Attendance session created
+            <div className="mt-5 space-y-3">
+              <QuickActionLink href="/teacher/students" primary>
+                View Students
+              </QuickActionLink>
+
+              <QuickActionLink href="/teacher/resources">
+                Manage Resources
+              </QuickActionLink>
+
+              <QuickActionLink href="/teacher/attendance">
+                Open Attendance
+              </QuickActionLink>
+
+              <QuickActionLink href="/teacher/submissions">
+                Review Projects
+              </QuickActionLink>
             </div>
           </div>
         </div>
       </section>
     </main>
+  );
+}
+
+function QuickLink({
+  href,
+  label,
+}: {
+  href: string;
+  label: string;
+}) {
+  return (
+    <a
+      href={href}
+      className="rounded-2xl border border-white/20 bg-white/15 px-4 py-3 text-center text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+    >
+      {label}
+    </a>
+  );
+}
+
+function ActionCard({
+  href,
+  title,
+  text,
+  tint,
+}: {
+  href: string;
+  title: string;
+  text: string;
+  tint: string;
+}) {
+  return (
+    <a
+      href={href}
+      className={`rounded-[1.5rem] border p-5 shadow-sm transition hover:shadow-md ${tint}`}
+    >
+      <p className="text-lg font-bold text-slate-900">{title}</p>
+      <p className="mt-3 text-sm leading-6 text-slate-600">{text}</p>
+    </a>
+  );
+}
+
+function ActivityItem({
+  title,
+  text,
+  tint,
+}: {
+  title: string;
+  text: string;
+  tint: string;
+}) {
+  return (
+    <div className={`rounded-[1.5rem] border p-4 ${tint}`}>
+      <p className="font-semibold text-slate-900">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{text}</p>
+    </div>
+  );
+}
+
+function QuickActionLink({
+  href,
+  children,
+  primary = false,
+}: {
+  href: string;
+  children: React.ReactNode;
+  primary?: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      className={`block w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold transition ${
+        primary
+          ? "bg-white text-emerald-700 hover:bg-emerald-50"
+          : "bg-white/15 text-white backdrop-blur hover:bg-white/20"
+      }`}
+    >
+      {children}
+    </a>
   );
 }

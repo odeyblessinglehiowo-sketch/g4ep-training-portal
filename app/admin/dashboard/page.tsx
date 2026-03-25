@@ -1,6 +1,7 @@
 import { requireRole } from "@/lib/auth";
-export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   await requireRole("ADMIN");
@@ -18,51 +19,79 @@ export default async function AdminDashboardPage() {
   const stats = [
     {
       title: "Total Students",
-      value: totalStudents,
+      value: `${totalStudents}`,
       note: "Registered training participants",
+      tone: "from-emerald-600 to-green-500",
+      soft: "bg-emerald-50 border-emerald-100",
+      valueColor: "text-emerald-800",
     },
     {
       title: "Resources Uploaded",
-      value: totalResources,
+      value: `${totalResources}`,
       note: "Training materials available",
+      tone: "from-lime-500 to-emerald-500",
+      soft: "bg-lime-50 border-lime-100",
+      valueColor: "text-lime-800",
     },
     {
       title: "Project Submissions",
-      value: totalSubmissions,
+      value: `${totalSubmissions}`,
       note: "Student assignments submitted",
+      tone: "from-green-600 to-emerald-600",
+      soft: "bg-green-50 border-green-100",
+      valueColor: "text-green-800",
     },
     {
       title: "Certificates Issued",
-      value: issuedCertificates,
+      value: `${issuedCertificates}`,
       note: "Certificates approved and released",
+      tone: "from-emerald-700 to-lime-500",
+      soft: "bg-emerald-50 border-emerald-100",
+      valueColor: "text-emerald-800",
     },
   ];
 
   return (
     <main className="space-y-6">
-      <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
-          Admin Dashboard
-        </p>
+      <section className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-emerald-900 via-green-700 to-lime-500 p-6 text-white shadow-lg shadow-emerald-200/50 sm:p-8">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50/90">
+              Admin Dashboard
+            </p>
 
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">
-          Training Command Center
-        </h1>
+            <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">
+              Training Command Center
+            </h1>
 
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-          Monitor students, resources, submissions, and certificate activity.
-        </p>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-emerald-50/90 sm:text-base">
+              Monitor students, resources, submissions, certificate activity,
+              and operational progress from one central management workspace.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:w-auto">
+            <QuickLink href="/admin/students" label="Students" />
+            <QuickLink href="/admin/resources" label="Resources" />
+            <QuickLink href="/admin/submissions" label="Projects" />
+            <QuickLink href="/admin/certificates" label="Certificates" />
+          </div>
+        </div>
       </section>
 
-      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <div
             key={stat.title}
-            className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+            className={`rounded-[1.75rem] border p-5 shadow-sm ${stat.soft}`}
           >
-            <p className="text-sm font-medium text-slate-500">{stat.title}</p>
+            <div className={`h-2 w-24 rounded-full bg-gradient-to-r ${stat.tone}`} />
 
-            <h2 className="mt-4 text-3xl font-bold text-slate-900">
+            <p className="mt-5 text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
+              {stat.title}
+            </p>
+
+            <h2 className={`mt-3 text-2xl font-bold ${stat.valueColor}`}>
               {stat.value}
             </h2>
 
@@ -74,73 +103,126 @@ export default async function AdminDashboardPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-3">
-        <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 xl:col-span-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-slate-900">
-              Recent Admin Activity
-            </h3>
+        <div className="rounded-[2rem] border border-emerald-100 bg-white/90 p-6 shadow-sm xl:col-span-2">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                Operations Overview
+              </p>
+              <h3 className="mt-2 text-2xl font-bold text-slate-900">
+                Recent Admin Activity
+              </h3>
+            </div>
 
-            <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
+            <span className="rounded-full bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.15em] text-emerald-700">
               Live
             </span>
           </div>
 
           <div className="mt-6 space-y-4">
-            <div className="rounded-2xl border border-slate-200 p-4">
-              <p className="font-semibold text-slate-900">
-                New student batch imported
-              </p>
-              <p className="mt-1 text-sm text-slate-600">
-                Registration data can be reviewed and onboarding can continue
-                from the admin panel.
-              </p>
-            </div>
+            <ActivityItem
+              title="New student batch imported"
+              text="Registration data can be reviewed and onboarding can continue from the admin panel."
+              tint="bg-emerald-50 border-emerald-100"
+            />
 
-            <div className="rounded-2xl border border-slate-200 p-4">
-              <p className="font-semibold text-slate-900">
-                Learning resources are now live
-              </p>
-              <p className="mt-1 text-sm text-slate-600">
-                Students can instantly access uploaded materials by track.
-              </p>
-            </div>
+            <ActivityItem
+              title="Learning resources are now live"
+              text="Students can instantly access uploaded materials by track."
+              tint="bg-lime-50 border-lime-100"
+            />
 
-            <div className="rounded-2xl border border-slate-200 p-4">
-              <p className="font-semibold text-slate-900">
-                Certificate verification is active
-              </p>
-              <p className="mt-1 text-sm text-slate-600">
-                Public verification links can now confirm issued certificates.
-              </p>
-            </div>
+            <ActivityItem
+              title="Certificate verification is active"
+              text="Public verification links can now confirm issued certificates."
+              tint="bg-green-50 border-green-100"
+            />
           </div>
         </div>
 
-        <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <h3 className="text-xl font-bold text-slate-900">
-            Quick Actions
-          </h3>
+        <div className="space-y-6">
+          <div className="rounded-[2rem] border border-emerald-100 bg-white/90 p-6 shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
+              Quick Actions
+            </p>
 
-          <div className="mt-6 space-y-3">
-            <AdminLinkButton href="/admin/students" primary>
-              Manage Students
-            </AdminLinkButton>
+            <div className="mt-5 space-y-3">
+              <AdminLinkButton href="/admin/students" primary>
+                Manage Students
+              </AdminLinkButton>
 
-            <AdminLinkButton href="/admin/resources">
-              Upload Resources
-            </AdminLinkButton>
+              <AdminLinkButton href="/admin/resources">
+                Upload Resources
+              </AdminLinkButton>
 
-            <AdminLinkButton href="/admin/submissions">
-              Review Submissions
-            </AdminLinkButton>
+              <AdminLinkButton href="/admin/submissions">
+                Review Submissions
+              </AdminLinkButton>
 
-            <AdminLinkButton href="/admin/certificates">
-              Issue Certificates
-            </AdminLinkButton>
+              <AdminLinkButton href="/admin/certificates">
+                Issue Certificates
+              </AdminLinkButton>
+
+              <AdminLinkButton href="/admin/users">
+                Manage Users
+              </AdminLinkButton>
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] border border-emerald-100 bg-gradient-to-br from-emerald-600 via-green-600 to-lime-500 p-6 text-white shadow-md">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-50/90">
+              Admin Notes
+            </p>
+
+            <div className="mt-5 space-y-3 text-sm leading-6 text-emerald-50/95">
+              <p className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
+                Monitor platform performance and keep training operations smooth.
+              </p>
+              <p className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
+                Review certificate issuance and submission flow regularly.
+              </p>
+              <p className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
+                Keep resources updated so learners always have current materials.
+              </p>
+            </div>
           </div>
         </div>
       </section>
     </main>
+  );
+}
+
+function QuickLink({
+  href,
+  label,
+}: {
+  href: string;
+  label: string;
+}) {
+  return (
+    <a
+      href={href}
+      className="rounded-2xl border border-white/20 bg-white/15 px-4 py-3 text-center text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+    >
+      {label}
+    </a>
+  );
+}
+
+function ActivityItem({
+  title,
+  text,
+  tint,
+}: {
+  title: string;
+  text: string;
+  tint: string;
+}) {
+  return (
+    <div className={`rounded-[1.5rem] border p-4 ${tint}`}>
+      <p className="font-semibold text-slate-900">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{text}</p>
+    </div>
   );
 }
 
@@ -156,9 +238,9 @@ function AdminLinkButton({
   return (
     <a
       href={href}
-      className={`block w-full rounded-xl px-4 py-3 text-left font-semibold transition ${
+      className={`block w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold transition ${
         primary
-          ? "bg-green-700 text-white hover:bg-green-800"
+          ? "bg-emerald-700 text-white hover:bg-emerald-800"
           : "bg-slate-100 text-slate-900 hover:bg-slate-200"
       }`}
     >
