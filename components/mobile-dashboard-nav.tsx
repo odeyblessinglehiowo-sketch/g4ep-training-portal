@@ -7,6 +7,7 @@ type NavItem = {
   name: string;
   href: string;
   short: string;
+  badge?: number;
 };
 
 export default function MobileDashboardNav({
@@ -29,13 +30,19 @@ export default function MobileDashboardNav({
           <Link
             key={item.name}
             href={item.href}
-            className={`rounded-2xl px-4 py-4 text-center text-sm font-semibold shadow-sm transition ${
+            className={`relative rounded-2xl px-4 py-4 text-center text-sm font-semibold shadow-sm transition ${
               active
                 ? "bg-emerald-600 text-white"
                 : "bg-gradient-to-br from-white to-emerald-50 text-slate-800 hover:text-emerald-700"
             }`}
           >
-            {item.short}
+            <span>{item.short}</span>
+
+            {item.badge !== undefined && item.badge > 0 && (
+              <span className="absolute -right-2 -top-2 inline-flex min-h-6 min-w-6 items-center justify-center rounded-full bg-red-600 px-2 text-xs font-bold text-white shadow">
+                {item.badge}
+              </span>
+            )}
           </Link>
         );
       })}

@@ -5,15 +5,7 @@ import LogoutButton from "@/components/logout-button";
 import PortalFooter from "@/components/portal-footer";
 import PortalSideNav from "@/components/portal-side-nav";
 import MobileDashboardNav from "@/components/mobile-dashboard-nav";
-
-const navItems = [
-  { name: "Dashboard", href: "/student/dashboard", short: "Home" },
-  { name: "Resources", href: "/student/resources", short: "Resources" },
-  { name: "Submissions", href: "/student/submissions", short: "Projects" },
-  { name: "Attendance", href: "/student/attendance", short: "Attendance" },
-  { name: "Certificate", href: "/student/certificate", short: "Certificate" },
-  { name: "Profile", href: "/student/profile", short: "Profile" },
-];
+import { db } from "@/lib/db";
 
 export default async function StudentLayout({
   children,
@@ -21,6 +13,42 @@ export default async function StudentLayout({
   children: ReactNode;
 }) {
   await requireRole("STUDENT");
+    const currentUser = await requireRole("STUDENT");
+
+  const studentUser = await db.user.findUnique({
+    where: {
+      id: currentUser.userId,
+    },
+    include: {
+      student: true,
+    },
+  });
+
+  const unreadReviewedCount = studentUser?.student
+    ? await db.submission.count({
+        where: {
+          studentId: studentUser.student.id,
+          status: {
+            in: ["APPROVED", "REJECTED"],
+          },
+          studentSeenReview: false,
+        },
+      })
+    : 0;
+
+  const navItems = [
+    { name: "Dashboard", href: "/student/dashboard", short: "Home" },
+    { name: "Resources", href: "/student/resources", short: "Resources" },
+    {
+      name: "Submissions",
+      href: "/student/submissions",
+      short: "Projects",
+      badge: unreadReviewedCount,
+    },
+    { name: "Attendance", href: "/student/attendance", short: "Attendance" },
+    { name: "Certificate", href: "/student/certificate", short: "Certificate" },
+    { name: "Profile", href: "/student/profile", short: "Profile" },
+  ];
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#dcfce7,_#f8fafc_40%,_#ecfdf5_70%,_#d1fae5)]">

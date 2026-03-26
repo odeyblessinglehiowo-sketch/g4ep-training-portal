@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 type NavItem = {
   name: string;
   href: string;
+  badge?: number;
 };
 
 export default function PortalSideNav({ items }: { items: NavItem[] }) {
@@ -35,12 +36,20 @@ export default function PortalSideNav({ items }: { items: NavItem[] }) {
               <span>{item.name}</span>
             </span>
 
-            <span
-              className={`text-emerald-600 transition ${
-                active ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-              }`}
-            >
-              →
+            <span className="flex items-center gap-2">
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="inline-flex min-h-6 min-w-6 items-center justify-center rounded-full bg-red-600 px-2 text-xs font-bold text-white shadow">
+                  {item.badge}
+                </span>
+              )}
+
+              <span
+                className={`text-emerald-600 transition ${
+                  active ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                }`}
+              >
+                →
+              </span>
             </span>
           </Link>
         );

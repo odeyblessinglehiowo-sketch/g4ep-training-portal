@@ -31,12 +31,13 @@ export default async function StudentDashboardPage() {
       studentId: student.id,
     },
   });
-  const reviewedSubmissionsCount = await db.submission.count({
+    const reviewedSubmissionsCount = await db.submission.count({
     where: {
       studentId: student.id,
       status: {
         in: ["APPROVED", "REJECTED"],
       },
+      studentSeenReview: false,
     },
   });
   const certificate = await db.certificate.findFirst({

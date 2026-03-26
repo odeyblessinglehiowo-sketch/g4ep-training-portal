@@ -5,14 +5,8 @@ import LogoutButton from "@/components/logout-button";
 import PortalFooter from "@/components/portal-footer";
 import PortalSideNav from "@/components/portal-side-nav";
 import MobileDashboardNav from "@/components/mobile-dashboard-nav";
+import { db } from "@/lib/db";
 
-const navItems = [
-  { name: "Dashboard", href: "/teacher/dashboard", short: "Home" },
-  { name: "Students", href: "/teacher/students", short: "Students" },
-  { name: "Resources", href: "/teacher/resources", short: "Resources" },
-  { name: "Attendance", href: "/teacher/attendance", short: "Attendance" },
-  { name: "Submissions", href: "/teacher/submissions", short: "Projects" },
-];
 
 export default async function TeacherLayout({
   children,
@@ -20,7 +14,40 @@ export default async function TeacherLayout({
   children: ReactNode;
 }) {
   await requireRole("TEACHER");
+  const currentUser = await requireRole("TEACHER");
 
+  const teacherUser = await db.user.findUnique({
+    where: {
+      id: currentUser.userId,
+    },
+    include: {
+      teacher: true,
+    },
+  });
+
+  const pendingSubmissionCount = teacherUser?.teacher
+    ? await db.submission.count({
+        where: {
+          student: {
+            track: teacherUser.teacher.track,
+          },
+          status: "PENDING",
+        },
+      })
+    : 0;
+
+  const navItems = [
+    { name: "Dashboard", href: "/teacher/dashboard", short: "Home" },
+    { name: "Students", href: "/teacher/students", short: "Students" },
+    { name: "Resources", href: "/teacher/resources", short: "Resources" },
+    { name: "Attendance", href: "/teacher/attendance", short: "Attendance" },
+    {
+      name: "Submissions",
+      href: "/teacher/submissions",
+      short: "Projects",
+      badge: pendingSubmissionCount,
+    },
+  ];
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#dcfce7,_#f8fafc_40%,_#ecfdf5_70%,_#d1fae5)]">
       <div className="mx-auto flex max-w-7xl gap-6 px-4 py-5 sm:px-6 lg:px-8">

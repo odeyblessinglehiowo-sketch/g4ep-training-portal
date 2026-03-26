@@ -49,13 +49,16 @@ export async function updateSubmissionStatus(formData: FormData) {
     }
   }
 
-  await db.submission.update({
+    await db.submission.update({
     where: {
       id: submissionId,
     },
     data: {
       status: status as "PENDING" | "APPROVED" | "REJECTED",
       remark,
+      studentSeenReview: false,
+      reviewSeenAt: new Date(),
+      teacherNotifiedAt: null,
     },
   });
 

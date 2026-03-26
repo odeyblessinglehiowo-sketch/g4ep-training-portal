@@ -29,12 +29,25 @@ export default async function StudentSubmissionsPage() {
       createdAt: "desc",
     },
   });
-  const reviewedSubmissionsCount = await db.submission.count({
+   const reviewedSubmissionsCount = await db.submission.count({
     where: {
       studentId: student.id,
       status: {
         in: ["APPROVED", "REJECTED"],
       },
+      studentSeenReview: false,
+    },
+  });
+    await db.submission.updateMany({
+    where: {
+      studentId: student.id,
+      status: {
+        in: ["APPROVED", "REJECTED"],
+      },
+      studentSeenReview: false,
+    },
+    data: {
+      studentSeenReview: true,
     },
   });
   return (
