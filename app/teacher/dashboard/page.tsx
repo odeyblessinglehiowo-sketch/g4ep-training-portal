@@ -41,6 +41,15 @@ export default async function TeacherDashboardPage() {
     },
   });
 
+    const pendingSubmissions = await db.submission.count({
+    where: {
+      student: {
+        track: teacher.track,
+      },
+      status: "PENDING",
+    },
+  });
+  
   const activeSessions = await db.attendanceSession.count({
     where: {
       track: teacher.track,
@@ -104,9 +113,13 @@ export default async function TeacherDashboardPage() {
           </div>
 
           <div className="grid w-full grid-cols-2 gap-3 sm:max-w-md 2xl:w-auto">
-            <QuickLink href="/teacher/attendance" label="Attendance" />
+                       <QuickLink href="/teacher/attendance" label="Attendance" />
             <QuickLink href="/teacher/resources" label="Resources" />
-            <QuickLink href="/teacher/submissions" label="Projects" />
+            <QuickLink
+              href="/teacher/submissions"
+              label="Projects"
+              badge={pendingSubmissions}
+            />
             <QuickLink href="/teacher/students" label="Students" />
           </div>
         </div>
@@ -195,7 +208,25 @@ export default async function TeacherDashboardPage() {
               Recent Activity
             </p>
 
-            <div className="mt-5 space-y-4">
+                      <div className="mt-5 space-y-4">
+              <ActivityItem
+                title={
+                  pendingSubmissions > 0
+                    ? `${pendingSubmissions} submission${pendingSubmissions === 1 ? "" : "s"} awaiting review`
+                    : "No pending submissions"
+                }
+                text={
+                  pendingSubmissions > 0
+                    ? "A student project needs your review. Open the submissions page to approve or reject it."
+                    : "You are all caught up. No student project is currently awaiting review."
+                }
+                tint={
+                  pendingSubmissions > 0
+                    ? "bg-red-50 border-red-200"
+                    : "bg-emerald-50 border-emerald-100"
+                }
+              />
+
               <ActivityItem
                 title="New resource uploaded"
                 text="Fresh training materials can now be accessed by students in your track."
@@ -248,16 +279,24 @@ export default async function TeacherDashboardPage() {
 function QuickLink({
   href,
   label,
+  badge,
 }: {
   href: string;
   label: string;
+  badge?: number;
 }) {
   return (
     <a
       href={href}
-      className="rounded-2xl border border-white/20 bg-white/15 px-4 py-3 text-center text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+      className="relative rounded-2xl border border-white/20 bg-white/15 px-4 py-3 text-center text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
     >
-      {label}
+      <span>{label}</span>
+
+      {badge !== undefined && badge > 0 && (
+        <span className="absolute -right-2 -top-2 inline-flex min-h-6 min-w-6 items-center justify-center rounded-full bg-red-600 px-2 text-xs font-bold text-white shadow">
+          {badge}
+        </span>
+      )}
     </a>
   );
 }

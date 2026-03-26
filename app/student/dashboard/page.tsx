@@ -31,7 +31,14 @@ export default async function StudentDashboardPage() {
       studentId: student.id,
     },
   });
-
+  const reviewedSubmissionsCount = await db.submission.count({
+    where: {
+      studentId: student.id,
+      status: {
+        in: ["APPROVED", "REJECTED"],
+      },
+    },
+  });
   const certificate = await db.certificate.findFirst({
     where: {
       studentId: student.id,
@@ -105,8 +112,12 @@ export default async function StudentDashboardPage() {
           </div>
 
           <div className="grid w-full grid-cols-2 gap-3 sm:max-w-md 2xl:w-auto">
-            <QuickLink href="/student/resources" label="View Materials" />
-            <QuickLink href="/student/submissions" label="Submit Project" />
+                        <QuickLink href="/student/resources" label="View Materials" />
+            <QuickLink
+              href="/student/submissions"
+              label="Submit Project"
+              badge={reviewedSubmissionsCount}
+            />
             <QuickLink href="/student/attendance" label="Attendance" />
             <QuickLink href="/student/certificate" label="Certificate" />
           </div>
@@ -152,7 +163,23 @@ export default async function StudentDashboardPage() {
               Active Student
             </span>
           </div>
-
+            <ActivityCard
+              title={
+                reviewedSubmissionsCount > 0
+                  ? "Submission review available"
+                  : "No new review yet"
+              }
+              text={
+                reviewedSubmissionsCount > 0
+                  ? `You have ${reviewedSubmissionsCount} submission review update${reviewedSubmissionsCount === 1 ? "" : "s"} available from your teacher.`
+                  : "Your submitted projects are still awaiting teacher review."
+              }
+              tint={
+                reviewedSubmissionsCount > 0
+                  ? "bg-red-50 border-red-200"
+                  : "bg-emerald-50 border-emerald-100"
+              }
+            />
           <div className="mt-6 space-y-4">
             <ActivityCard
               title="Training materials available"
@@ -233,16 +260,24 @@ export default async function StudentDashboardPage() {
 function QuickLink({
   href,
   label,
+  badge,
 }: {
   href: string;
   label: string;
+  badge?: number;
 }) {
   return (
     <a
       href={href}
-      className="rounded-2xl border border-white/20 bg-white/15 px-4 py-3 text-center text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+      className="relative rounded-2xl border border-white/20 bg-white/15 px-4 py-3 text-center text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
     >
-      {label}
+      <span>{label}</span>
+
+      {badge !== undefined && badge > 0 && (
+        <span className="absolute -right-2 -top-2 inline-flex min-h-6 min-w-6 items-center justify-center rounded-full bg-red-600 px-2 text-xs font-bold text-white shadow">
+          {badge}
+        </span>
+      )}
     </a>
   );
 }

@@ -20,6 +20,7 @@ export async function getCurrentUser() {
       email: true,
       role: true,
       isActive: true,
+      name: true,
     },
   });
 
@@ -31,6 +32,7 @@ export async function getCurrentUser() {
     userId: user.id,
     email: user.email,
     role: user.role as UserRole,
+    name: user.name,
   };
 }
 
@@ -44,10 +46,10 @@ export async function requireAuth() {
   return user;
 }
 
-export async function requireRole(role: UserRole) {
+export async function requireRole(...roles: UserRole[]) {
   const user = await requireAuth();
 
-  if (user.role !== role) {
+  if (!roles.includes(user.role)) {
     if (user.role === "ADMIN") {
       redirect("/admin/dashboard");
     }
