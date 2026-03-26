@@ -77,7 +77,23 @@ export default async function StudentSubmissionsPage() {
           </button>
         </form>
       </section>
+       {reviewedSubmissionsCount > 0 && (
+        <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
+            Review Update
+          </p>
 
+          <h2 className="mt-2 text-2xl font-bold text-slate-900">
+            You have {reviewedSubmissionsCount} reviewed submission
+            {reviewedSubmissionsCount === 1 ? "" : "s"}
+          </h2>
+
+          <p className="mt-2 text-sm text-slate-600">
+            Your teacher has reviewed one or more of your submitted projects.
+            Check the remarks below for feedback.
+          </p>
+        </section>
+      )}
       <section className="grid gap-6">
         {submissions.length > 0 ? (
           submissions.map((submission) => (
@@ -141,23 +157,7 @@ export default async function StudentSubmissionsPage() {
             <p className="text-sm text-slate-600">No submissions yet.</p>
           </div>
         )}
-              {reviewedSubmissionsCount > 0 && (
-        <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
-            Review Update
-          </p>
-
-          <h2 className="mt-2 text-2xl font-bold text-slate-900">
-            You have {reviewedSubmissionsCount} reviewed submission
-            {reviewedSubmissionsCount === 1 ? "" : "s"}
-          </h2>
-
-          <p className="mt-2 text-sm text-slate-600">
-            Your teacher has reviewed one or more of your submitted projects.
-            Check the remarks below for feedback.
-          </p>
-        </section>
-      )}
+       
       </section>
     </main>
   );
