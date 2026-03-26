@@ -1,8 +1,9 @@
 import { requireRole } from "@/lib/auth";
-export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { getStudentAttendanceMetrics } from "@/lib/student-progress";
 import { issueCertificate } from "./actions";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminCertificatesPage({
   searchParams,
@@ -104,24 +105,55 @@ export default async function AdminCertificatesPage({
     })
   );
 
+  const totalCertificates = enrichedCertificates.length;
+  const pendingCertificates = enrichedCertificates.filter(
+    (certificate) => certificate.status === "PENDING"
+  ).length;
+  const issuedCertificates = enrichedCertificates.filter(
+    (certificate) => certificate.status === "ISSUED"
+  ).length;
+
   return (
     <main className="space-y-6">
-      <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
+      <section className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-emerald-900 via-green-700 to-lime-500 p-6 text-white shadow-lg shadow-emerald-200/50 sm:p-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50/90">
           Certificates
         </p>
 
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">
+        <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
           Issue Certificates
         </h1>
 
-        <p className="mt-2 text-sm text-slate-600">
-          Review certificate records, attendance percentage, and issue certificates manually.
+        <p className="mt-4 max-w-3xl text-sm leading-7 text-emerald-50/90 sm:text-base">
+          Review certificate records, attendance percentage, certificate status,
+          and manually activate certificate access for eligible students.
         </p>
       </section>
 
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Records Found" value={totalCertificates} />
+        <StatCard
+          label="Pending"
+          value={pendingCertificates}
+          tone="bg-yellow-50"
+          valueClass="text-yellow-700"
+        />
+        <StatCard
+          label="Issued"
+          value={issuedCertificates}
+          tone="bg-emerald-50"
+          valueClass="text-emerald-700"
+        />
+        <StatCard
+          label="Tracks"
+          value={trackOptions.length}
+          tone="bg-lime-50"
+          valueClass="text-lime-700"
+        />
+      </section>
+
       {error && (
-        <section className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm ring-1 ring-red-100">
+        <section className="rounded-[1.75rem] border border-red-200 bg-red-50 p-5 shadow-sm ring-1 ring-red-100">
           <p className="text-base font-bold text-red-800">
             Action could not be completed
           </p>
@@ -130,7 +162,7 @@ export default async function AdminCertificatesPage({
       )}
 
       {success === "issued" && successName && (
-        <section className="rounded-3xl border border-green-200 bg-green-50 p-5 shadow-sm ring-1 ring-green-100">
+        <section className="rounded-[1.75rem] border border-green-200 bg-green-50 p-5 shadow-sm ring-1 ring-green-100">
           <p className="text-base font-bold text-green-800">
             Certificate issued successfully
           </p>
@@ -140,7 +172,7 @@ export default async function AdminCertificatesPage({
         </section>
       )}
 
-      <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <section className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
         <h2 className="text-xl font-bold text-slate-900">Search & Filters</h2>
         <p className="mt-1 text-sm text-slate-600">
           Search by name, email, or certificate ID. Filter by track and certificate status.
@@ -199,75 +231,54 @@ export default async function AdminCertificatesPage({
       <section className="grid gap-6">
         {enrichedCertificates.length > 0 ? (
           enrichedCertificates.map((certificate) => (
-            <div
+            <article
               key={certificate.id}
-              className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+              className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm transition hover:shadow-md"
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">
-                    {certificate.student.user.name}
-                  </h3>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h3 className="text-xl font-bold text-slate-900">
+                      {certificate.student.user.name}
+                    </h3>
 
-                  <p className="mt-2 text-sm text-slate-600">
-                    Email: {certificate.student.user.email}
-                  </p>
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        certificate.status === "ISSUED"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {certificate.status}
+                    </span>
+                  </div>
 
-                  <p className="mt-1 text-sm text-slate-600">
-                    Track: {certificate.student.track}
-                  </p>
-
-                  <p className="mt-1 text-sm text-slate-600">
-                    Certificate ID: {certificate.certificateId ?? "Not assigned"}
-                  </p>
-
-                  <p className="mt-1 text-sm text-slate-600">
-                    Issued Date:{" "}
-                    {certificate.issuedAt
-                      ? new Date(certificate.issuedAt).toLocaleDateString()
-                      : "Not issued yet"}
-                  </p>
+                  <div className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
+                    <p>Email: {certificate.student.user.email}</p>
+                    <p>Track: {certificate.student.track}</p>
+                    <p>
+                      Certificate ID: {certificate.certificateId ?? "Not assigned"}
+                    </p>
+                    <p>
+                      Issued Date:{" "}
+                      {certificate.issuedAt
+                        ? new Date(certificate.issuedAt).toLocaleDateString()
+                        : "Not issued yet"}
+                    </p>
+                  </div>
                 </div>
-
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    certificate.status === "ISSUED"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-yellow-100 text-yellow-700"
-                  }`}
-                >
-                  {certificate.status}
-                </span>
               </div>
 
-              <div className="mt-6 grid gap-4 md:grid-cols-4">
-                <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-                  <p className="text-sm font-medium text-slate-500">Present</p>
-                  <p className="mt-2 text-2xl font-bold text-slate-900">
-                    {certificate.metrics.presentCount}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-                  <p className="text-sm font-medium text-slate-500">Absent</p>
-                  <p className="mt-2 text-2xl font-bold text-slate-900">
-                    {certificate.metrics.absentCount}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-                  <p className="text-sm font-medium text-slate-500">Sessions</p>
-                  <p className="mt-2 text-2xl font-bold text-slate-900">
-                    {certificate.metrics.totalSessions}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-green-50 p-4 ring-1 ring-green-100">
-                  <p className="text-sm font-medium text-slate-500">Attendance %</p>
-                  <p className="mt-2 text-2xl font-bold text-green-700">
-                    {certificate.metrics.attendancePercentage}%
-                  </p>
-                </div>
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <MiniCard label="Present" value={certificate.metrics.presentCount} />
+                <MiniCard label="Absent" value={certificate.metrics.absentCount} />
+                <MiniCard label="Sessions" value={certificate.metrics.totalSessions} />
+                <MiniCard
+                  label="Attendance %"
+                  value={`${certificate.metrics.attendancePercentage}%`}
+                  soft="bg-green-50 ring-green-100"
+                  valueClass="text-green-700"
+                />
               </div>
 
               <div className="mt-6 flex flex-wrap gap-3">
@@ -284,7 +295,7 @@ export default async function AdminCertificatesPage({
 
                     <button
                       type="submit"
-                      className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
+                      className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
                     >
                       Issue Certificate
                     </button>
@@ -296,16 +307,16 @@ export default async function AdminCertificatesPage({
                     href={`/verify/${certificate.certificateId}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                    className="inline-block rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
                   >
                     Open Verification Page
                   </a>
                 )}
               </div>
-            </div>
+            </article>
           ))
         ) : (
-          <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+          <div className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-600">
               No certificate records matched your filters.
             </p>
@@ -313,5 +324,43 @@ export default async function AdminCertificatesPage({
         )}
       </section>
     </main>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  tone = "bg-white",
+  valueClass = "text-slate-900",
+}: {
+  label: string;
+  value: string | number;
+  tone?: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className={`rounded-[1.5rem] p-5 shadow-sm ring-1 ring-slate-200 ${tone}`}>
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className={`mt-2 text-3xl font-bold ${valueClass}`}>{value}</p>
+    </div>
+  );
+}
+
+function MiniCard({
+  label,
+  value,
+  soft = "bg-slate-50 ring-slate-200",
+  valueClass = "text-slate-900",
+}: {
+  label: string;
+  value: string | number;
+  soft?: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className={`rounded-2xl p-4 ring-1 ${soft}`}>
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className={`mt-2 text-2xl font-bold ${valueClass}`}>{value}</p>
+    </div>
   );
 }

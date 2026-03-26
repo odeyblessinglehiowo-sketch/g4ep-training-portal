@@ -1,9 +1,10 @@
 import QRCode from "qrcode";
 import { requireRole } from "@/lib/auth";
-export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { syncExpiredAttendanceSessions } from "@/lib/attendance";
 import { createAttendanceSession } from "./actions";
+
+export const dynamic = "force-dynamic";
 
 export default async function TeacherAttendancePage({
   searchParams,
@@ -72,24 +73,64 @@ export default async function TeacherAttendancePage({
   const error = params.error;
   const sessionTitle = params.title;
 
+  const totalSessions = sessions.length;
+  const activeSessions = sessions.filter((session) => session.isActive).length;
+  const totalPresent = sessions.reduce(
+    (sum, session) =>
+      sum +
+      session.attendanceRecords.filter((record) => record.status === "PRESENT")
+        .length,
+    0
+  );
+  const totalAbsent = sessions.reduce(
+    (sum, session) =>
+      sum +
+      session.attendanceRecords.filter((record) => record.status === "ABSENT")
+        .length,
+    0
+  );
+
   return (
     <main className="space-y-6">
-      <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
+      <section className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-emerald-800 via-green-700 to-lime-500 p-6 text-white shadow-lg shadow-emerald-200/50 sm:p-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50/90">
           Attendance
         </p>
 
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">
+        <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
           Attendance Sessions
         </h1>
 
-        <p className="mt-2 text-sm text-slate-600">
-          Create attendance sessions and track present and absent students for your class.
+        <p className="mt-4 max-w-3xl text-sm leading-7 text-emerald-50/90 sm:text-base">
+          Create attendance sessions, display QR codes for instant check-in,
+          and monitor present and absent students across your assigned track.
         </p>
       </section>
 
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Track Students" value={totalStudentsInTrack} />
+        <StatCard
+          label="Sessions"
+          value={totalSessions}
+          tone="bg-white"
+          valueClass="text-slate-900"
+        />
+        <StatCard
+          label="Active Sessions"
+          value={activeSessions}
+          tone="bg-emerald-50"
+          valueClass="text-emerald-700"
+        />
+        <StatCard
+          label="Total Check-ins"
+          value={totalPresent}
+          tone="bg-lime-50"
+          valueClass="text-lime-700"
+        />
+      </section>
+
       {error && (
-        <section className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm ring-1 ring-red-100">
+        <section className="rounded-[1.75rem] border border-red-200 bg-red-50 p-5 shadow-sm ring-1 ring-red-100">
           <p className="text-base font-bold text-red-800">
             Attendance session could not be created
           </p>
@@ -98,7 +139,7 @@ export default async function TeacherAttendancePage({
       )}
 
       {success === "created" && sessionTitle && (
-        <section className="rounded-3xl border border-green-200 bg-green-50 p-5 shadow-sm ring-1 ring-green-100">
+        <section className="rounded-[1.75rem] border border-green-200 bg-green-50 p-5 shadow-sm ring-1 ring-green-100">
           <p className="text-base font-bold text-green-800">
             Attendance session created
           </p>
@@ -108,49 +149,68 @@ export default async function TeacherAttendancePage({
         </section>
       )}
 
-      <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <div className="mb-4 rounded-2xl bg-green-50 p-4">
-          <p className="text-sm font-medium text-slate-600">Assigned Track</p>
-          <p className="mt-1 text-lg font-bold text-green-800">{teacher.track}</p>
-          <p className="mt-2 text-sm text-slate-600">
-            Total students expected per session: {totalStudentsInTrack}
+      <section className="grid gap-6 xl:grid-cols-[1fr_0.95fr]">
+        <section className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
+          <div className="mb-5 rounded-[1.5rem] bg-emerald-50 p-4 ring-1 ring-emerald-100">
+            <p className="text-sm font-medium text-slate-600">Assigned Track</p>
+            <p className="mt-1 text-lg font-bold text-emerald-800">
+              {teacher.track}
+            </p>
+            <p className="mt-2 text-sm text-slate-600">
+              Total students expected per session: {totalStudentsInTrack}
+            </p>
+          </div>
+
+          <h2 className="text-xl font-bold text-slate-900">
+            Start New Attendance Session
+          </h2>
+
+          <p className="mt-1 text-sm text-slate-600">
+            Create a live session and let students scan the QR code to mark attendance instantly.
           </p>
-        </div>
 
-        <h2 className="text-xl font-bold text-slate-900">
-          Start New Attendance Session
-        </h2>
-
-        <p className="mt-1 text-sm text-slate-600">
-          Create a live session and let students scan the QR code to mark attendance instantly.
-        </p>
-
-        <form
-          action={createAttendanceSession}
-          className="mt-6 grid gap-4 md:grid-cols-2"
-        >
-          <input
-            name="title"
-            type="text"
-            placeholder="Session title e.g. HTML Class - Morning"
-            className="rounded-lg border border-slate-300 px-4 py-2 outline-none transition focus:border-green-700"
-          />
-
-          <input
-            name="duration"
-            type="number"
-            min="1"
-            placeholder="Duration in minutes e.g. 30"
-            className="rounded-lg border border-slate-300 px-4 py-2 outline-none transition focus:border-green-700"
-          />
-
-          <button
-            type="submit"
-            className="md:col-span-2 rounded-lg bg-green-700 py-2 font-semibold text-white transition hover:bg-green-800 active:scale-[0.98]"
+          <form
+            action={createAttendanceSession}
+            className="mt-6 grid gap-4 md:grid-cols-2"
           >
-            Start Attendance Session
-          </button>
-        </form>
+            <input
+              name="title"
+              type="text"
+              placeholder="Session title e.g. HTML Class - Morning"
+              className="rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-green-700"
+            />
+
+            <input
+              name="duration"
+              type="number"
+              min="1"
+              placeholder="Duration in minutes e.g. 30"
+              className="rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-green-700"
+            />
+
+            <button
+              type="submit"
+              className="md:col-span-2 rounded-xl bg-green-700 py-3 font-semibold text-white transition hover:bg-green-800 active:scale-[0.98]"
+            >
+              Start Attendance Session
+            </button>
+          </form>
+        </section>
+
+        <section className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-bold text-slate-900">Attendance Summary</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Quick overview of your attendance workflow across all sessions.
+          </p>
+
+          <div className="mt-6 space-y-4">
+            <SummaryRow label="Track" value={teacher.track} />
+            <SummaryRow label="Students" value={`${totalStudentsInTrack}`} />
+            <SummaryRow label="Active Sessions" value={`${activeSessions}`} />
+            <SummaryRow label="Present Records" value={`${totalPresent}`} />
+            <SummaryRow label="Absent Records" value={`${totalAbsent}`} />
+          </div>
+        </section>
       </section>
 
       <section className="grid gap-6">
@@ -172,72 +232,60 @@ export default async function TeacherAttendancePage({
               ).length;
 
               return (
-                <div
+                <article
                   key={session.id}
-                  className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+                  className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm transition hover:shadow-md"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
-                      <h3 className="text-lg font-bold text-slate-900">
-                        {session.title}
-                      </h3>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h3 className="text-xl font-bold text-slate-900">
+                          {session.title}
+                        </h3>
 
-                      <p className="mt-2 text-sm text-slate-600">
-                        Track: {session.track}
-                      </p>
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                            session.isActive
+                              ? "bg-green-100 text-green-700"
+                              : "bg-slate-100 text-slate-700"
+                          }`}
+                        >
+                          {session.isActive ? "ACTIVE" : "CLOSED"}
+                        </span>
+                      </div>
 
-                      <p className="mt-1 text-sm text-slate-600">
-                        Session URL QR is linked to:
-                      </p>
-                      <p className="mt-1 break-all text-sm text-slate-800">
-                        {qrTarget}
-                      </p>
-
-                      <p className="mt-2 text-sm text-slate-600">
-                        Starts: {new Date(session.startsAt).toLocaleString()}
-                      </p>
-
-                      <p className="mt-1 text-sm text-slate-600">
-                        Ends: {new Date(session.endsAt).toLocaleString()}
-                      </p>
+                      <div className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
+                        <p>Track: {session.track}</p>
+                        <p>Starts: {new Date(session.startsAt).toLocaleString()}</p>
+                        <p>Ends: {new Date(session.endsAt).toLocaleString()}</p>
+                        <p>Expected: {totalStudentsInTrack}</p>
+                      </div>
                     </div>
-
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        session.isActive
-                          ? "bg-green-100 text-green-700"
-                          : "bg-slate-100 text-slate-700"
-                      }`}
-                    >
-                      {session.isActive ? "ACTIVE" : "CLOSED"}
-                    </span>
                   </div>
 
                   <div className="mt-6 grid gap-4 md:grid-cols-3">
-                    <div className="rounded-2xl bg-green-50 p-4 ring-1 ring-green-100">
-                      <p className="text-sm font-medium text-slate-600">Present</p>
-                      <p className="mt-2 text-2xl font-bold text-green-700">
-                        {presentCount}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl bg-red-50 p-4 ring-1 ring-red-100">
-                      <p className="text-sm font-medium text-slate-600">Absent</p>
-                      <p className="mt-2 text-2xl font-bold text-red-600">
-                        {absentCount}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-                      <p className="text-sm font-medium text-slate-600">Expected</p>
-                      <p className="mt-2 text-2xl font-bold text-slate-900">
-                        {totalStudentsInTrack}
-                      </p>
-                    </div>
+                    <MiniCard
+                      label="Present"
+                      value={presentCount}
+                      soft="bg-green-50 ring-green-100"
+                      valueClass="text-green-700"
+                    />
+                    <MiniCard
+                      label="Absent"
+                      value={absentCount}
+                      soft="bg-red-50 ring-red-100"
+                      valueClass="text-red-600"
+                    />
+                    <MiniCard
+                      label="Expected"
+                      value={totalStudentsInTrack}
+                      soft="bg-slate-50 ring-slate-200"
+                      valueClass="text-slate-900"
+                    />
                   </div>
 
                   <div className="mt-6 grid gap-6 lg:grid-cols-2">
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
                       <p className="text-sm font-semibold text-slate-800">
                         Attendance QR Code
                       </p>
@@ -253,6 +301,15 @@ export default async function TeacherAttendancePage({
                       <p className="mt-3 text-center text-sm text-slate-600">
                         Students can scan this QR code and attendance will be marked immediately.
                       </p>
+
+                      <div className="mt-4 rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                          Linked URL
+                        </p>
+                        <p className="mt-2 break-all text-sm text-slate-800">
+                          {qrTarget}
+                        </p>
+                      </div>
                     </div>
 
                     <div>
@@ -299,12 +356,12 @@ export default async function TeacherAttendancePage({
                       </div>
                     </div>
                   </div>
-                </div>
+                </article>
               );
             })
           )
         ) : (
-          <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+          <div className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-600">
               No attendance sessions found yet.
             </p>
@@ -312,5 +369,60 @@ export default async function TeacherAttendancePage({
         )}
       </section>
     </main>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  tone = "bg-white",
+  valueClass = "text-slate-900",
+}: {
+  label: string;
+  value: string | number;
+  tone?: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className={`rounded-[1.5rem] p-5 shadow-sm ring-1 ring-slate-200 ${tone}`}>
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className={`mt-2 text-3xl font-bold ${valueClass}`}>{value}</p>
+    </div>
+  );
+}
+
+function MiniCard({
+  label,
+  value,
+  soft = "bg-slate-50 ring-slate-200",
+  valueClass = "text-slate-900",
+}: {
+  label: string;
+  value: string | number;
+  soft?: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className={`rounded-2xl p-4 ring-1 ${soft}`}>
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className={`mt-2 text-2xl font-bold ${valueClass}`}>{value}</p>
+    </div>
+  );
+}
+
+function SummaryRow({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string | null;
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+      <span className="text-sm font-medium text-slate-500">{label}</span>
+      <span className="text-sm font-semibold text-slate-900">
+        {value ?? "Not Available"}
+      </span>
+    </div>
   );
 }
