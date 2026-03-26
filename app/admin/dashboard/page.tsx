@@ -54,7 +54,7 @@ export default async function AdminDashboardPage() {
   return (
     <main className="space-y-6">
       <section className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-emerald-900 via-green-700 to-lime-500 p-6 text-white shadow-lg shadow-emerald-200/50 sm:p-8">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+        <div className="flex flex-col gap-6 2xl:flex-row 2xl:items-end 2xl:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50/90">
               Admin Dashboard
@@ -70,7 +70,7 @@ export default async function AdminDashboardPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:w-auto">
+          <div className="grid w-full grid-cols-2 gap-3 sm:max-w-md 2xl:w-auto">
             <QuickLink href="/admin/students" label="Students" />
             <QuickLink href="/admin/resources" label="Resources" />
             <QuickLink href="/admin/submissions" label="Projects" />

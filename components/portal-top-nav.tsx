@@ -47,7 +47,7 @@ export default function PortalTopNav({ items }: { items: NavItem[] }) {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`min-w-0 flex-1 rounded-lg px-2 py-2 text-center text-sm font-extrabold transition active:scale-[0.98] ${
+                className={`min-w-0 flex-1 rounded-lg px-1.5 py-2 text-center text-[13px] font-extrabold transition active:scale-[0.98] ${
                   active
                     ? "bg-emerald-600 text-white"
                     : "text-emerald-700 hover:bg-emerald-100"

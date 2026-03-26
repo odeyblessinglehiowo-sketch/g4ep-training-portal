@@ -88,7 +88,7 @@ export default async function StudentDashboardPage() {
   return (
     <main className="space-y-6">
       <section className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-emerald-800 via-green-700 to-lime-500 p-6 text-white shadow-lg shadow-emerald-200/50 sm:p-8">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+        <div className="flex flex-col gap-6 2xl:flex-row 2xl:items-end 2xl:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50/90">
               Student Dashboard
@@ -99,11 +99,12 @@ export default async function StudentDashboardPage() {
             </h1>
 
             <p className="mt-4 max-w-2xl text-sm leading-7 text-emerald-50/90 sm:text-base">
-              
+              Stay on top of your learning journey, monitor your attendance,
+              submit projects, access study materials, and track your certificate progress from one clean workspace.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:w-auto">
+          <div className="grid w-full grid-cols-2 gap-3 sm:max-w-md 2xl:w-auto">
             <QuickLink href="/student/resources" label="View Materials" />
             <QuickLink href="/student/submissions" label="Submit Project" />
             <QuickLink href="/student/attendance" label="Attendance" />

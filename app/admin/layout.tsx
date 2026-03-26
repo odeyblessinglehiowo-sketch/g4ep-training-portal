@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import PortalFooter from "@/components/portal-footer";
 import PortalSideNav from "@/components/portal-side-nav";
+import MobileDashboardNav from "@/components/mobile-dashboard-nav";
 
 const navItems = [
   { name: "Dashboard", href: "/admin/dashboard", short: "Home" },
@@ -69,17 +70,8 @@ export default function AdminLayout({
 </div>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:hidden">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-white to-emerald-50 px-4 py-4 text-center text-sm font-semibold text-slate-800 shadow-sm transition hover:border-emerald-200 hover:text-emerald-700"
-                >
-                  {item.short}
-                </Link>
-              ))}
-            </div>
+            <MobileDashboardNav items={navItems} />
+            
           </div>
 
           <div className="mt-5 space-y-6">{children}</div>
