@@ -51,7 +51,7 @@ export default async function StudentDashboardPage() {
 
   const metrics = await getStudentAttendanceMetrics(student.id);
 
-  const cards = [
+  const stats = [
     {
       title: "My Track",
       value: student.track ?? "Not Assigned",
@@ -125,28 +125,28 @@ export default async function StudentDashboardPage() {
         </div>
       </section>
 
-      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map((card) => (
-          <div
-            key={card.title}
-            className={`rounded-[1.75rem] border p-5 shadow-sm ${card.soft}`}
-          >
-            <div className={`h-2 w-24 rounded-full bg-gradient-to-r ${card.tone}`} />
+<section className="grid grid-cols-2 gap-4 md:gap-5 xl:grid-cols-4">
+  {stats.map((stat) => (
+    <div
+      key={stat.title}
+      className={`rounded-[1.75rem] border p-4 shadow-sm sm:p-5 ${stat.soft}`}
+    >
+      <div className={`h-2 w-24 rounded-full bg-gradient-to-r ${stat.tone}`} />
 
-            <p className="mt-5 text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
-              {card.title}
-            </p>
+      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-sm">
+        {stat.title}
+      </p>
 
-            <h2 className={`mt-3 text-2xl font-bold ${card.valueColor}`}>
-              {card.value}
-            </h2>
+      <h2 className={`mt-3 text-xl font-bold sm:text-2xl ${stat.valueColor}`}>
+        {stat.value}
+      </h2>
 
-            <p className="mt-3 text-sm leading-6 text-slate-600">
-              {card.note}
-            </p>
-          </div>
-        ))}
-      </section>
+      <p className="mt-3 text-sm leading-6 text-slate-600">
+        {stat.note}
+      </p>
+    </div>
+  ))}
+</section>
 
       <section className="grid gap-6 xl:grid-cols-3">
         <div className="rounded-[2rem] border border-emerald-100 bg-white/90 p-6 shadow-sm xl:col-span-2">
