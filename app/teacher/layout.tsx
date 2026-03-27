@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ReactNode } from "react";
 import { requireRole } from "@/lib/auth";
 import LogoutButton from "@/components/logout-button";
@@ -7,13 +6,11 @@ import PortalSideNav from "@/components/portal-side-nav";
 import MobileDashboardNav from "@/components/mobile-dashboard-nav";
 import { db } from "@/lib/db";
 
-
 export default async function TeacherLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  await requireRole("TEACHER");
   const currentUser = await requireRole("TEACHER");
 
   const teacherUser = await db.user.findUnique({
@@ -36,10 +33,26 @@ export default async function TeacherLayout({
       })
     : 0;
 
+  const assignmentCount = teacherUser?.teacher
+    ? await db.assignment.count({
+        where: {
+          teacherId: teacherUser.teacher.id,
+          track: teacherUser.teacher.track,
+          isPublished: true,
+        },
+      })
+    : 0;
+
   const navItems = [
     { name: "Dashboard", href: "/teacher/dashboard", short: "Home" },
     { name: "Students", href: "/teacher/students", short: "Students" },
     { name: "Resources", href: "/teacher/resources", short: "Resources" },
+    {
+      name: "Assignments",
+      href: "/teacher/assignments",
+      short: "Assignments",
+      badge: assignmentCount,
+    },
     { name: "Attendance", href: "/teacher/attendance", short: "Attendance" },
     {
       name: "Submissions",
@@ -48,6 +61,7 @@ export default async function TeacherLayout({
       badge: pendingSubmissionCount,
     },
   ];
+
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#dcfce7,_#f8fafc_40%,_#ecfdf5_70%,_#d1fae5)]">
       <div className="mx-auto flex max-w-7xl gap-6 px-4 py-5 sm:px-6 lg:px-8">
@@ -60,17 +74,21 @@ export default async function TeacherLayout({
             <h2 className="mt-3 text-2xl font-bold">G4EP RISE</h2>
 
             <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-              Manage your track, monitor students, upload learning resources, and review submissions.
+              Manage your track, monitor students, upload learning resources,
+              publish assignments, and review submissions.
             </p>
           </div>
 
-        <PortalSideNav items={navItems} />
+          <PortalSideNav items={navItems} />
 
           <div className="mt-8 rounded-[1.75rem] border border-emerald-100 bg-gradient-to-r from-emerald-50 to-lime-50 p-4">
-            <p className="text-sm font-semibold text-emerald-800">Teaching Tools</p>
+            <p className="text-sm font-semibold text-emerald-800">
+              Teaching Tools
+            </p>
             <p className="mt-2 text-sm leading-6 text-slate-700">
               Use this space to manage attendance sessions, publish resources,
-              and review student performance across your assigned track.
+              create assignments, and review student performance across your
+              assigned track.
             </p>
           </div>
         </aside>
@@ -87,16 +105,15 @@ export default async function TeacherLayout({
                 </h1>
               </div>
 
-      <div className="flex w-full items-center justify-between gap-3 lg:w-auto lg:justify-end">
-  <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
-    Teacher
-  </span>
-  <LogoutButton />
-</div>
+              <div className="flex w-full items-center justify-between gap-3 lg:w-auto lg:justify-end">
+                <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+                  Teacher
+                </span>
+                <LogoutButton />
+              </div>
             </div>
 
             <MobileDashboardNav items={navItems} />
-            
           </div>
 
           <div className="mt-5 space-y-6">{children}</div>

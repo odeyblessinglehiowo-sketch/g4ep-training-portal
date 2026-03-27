@@ -26,12 +26,35 @@ export default async function StudentDashboardPage() {
     },
   });
 
+  const assignmentsCount = await db.assignment.count({
+    where: {
+      track: student.track,
+      isPublished: true,
+    },
+  });
+
+  const unreadAssignmentsCount = await db.assignment.count({
+    where: {
+      track: student.track,
+      isPublished: true,
+      views: {
+        none: {
+          studentId: student.id,
+          seenAt: {
+            not: null,
+          },
+        },
+      },
+    },
+  });
+
   const submissionCount = await db.submission.count({
     where: {
       studentId: student.id,
     },
   });
-    const reviewedSubmissionsCount = await db.submission.count({
+
+  const reviewedSubmissionsCount = await db.submission.count({
     where: {
       studentId: student.id,
       status: {
@@ -40,6 +63,7 @@ export default async function StudentDashboardPage() {
       studentSeenReview: false,
     },
   });
+
   const certificate = await db.certificate.findFirst({
     where: {
       studentId: student.id,
@@ -69,9 +93,9 @@ export default async function StudentDashboardPage() {
       valueColor: "text-lime-800",
     },
     {
-      title: "Project Submissions",
-      value: `${submissionCount} Total`,
-      note: "Upload and manage your work",
+      title: "Assignments",
+      value: `${assignmentsCount} Total`,
+      note: `${unreadAssignmentsCount} new assignment${unreadAssignmentsCount === 1 ? "" : "s"} waiting`,
       tone: "from-green-600 to-emerald-600",
       soft: "bg-green-50 border-green-100",
       valueColor: "text-green-800",
@@ -90,8 +114,8 @@ export default async function StudentDashboardPage() {
     certificate?.status === "ISSUED"
       ? "Issued"
       : certificate?.status === "PENDING"
-      ? "In Progress"
-      : "Not Available";
+        ? "In Progress"
+        : "Not Available";
 
   return (
     <main className="space-y-6">
@@ -108,45 +132,48 @@ export default async function StudentDashboardPage() {
 
             <p className="mt-4 max-w-2xl text-sm leading-7 text-emerald-50/90 sm:text-base">
               Stay on top of your learning journey, monitor your attendance,
-              submit projects, access study materials, and track your certificate progress from one clean workspace.
+              view assignments, submit projects, access study materials, and
+              track your certificate progress from one clean workspace.
             </p>
           </div>
 
           <div className="grid w-full grid-cols-2 gap-3 sm:max-w-md 2xl:w-auto">
-                        <QuickLink href="/student/resources" label="View Materials" />
+            <QuickLink href="/student/resources" label="View Materials" />
+            <QuickLink
+              href="/student/assignments"
+              label="Assignments"
+              badge={unreadAssignmentsCount}
+            />
             <QuickLink
               href="/student/submissions"
               label="Submit Project"
               badge={reviewedSubmissionsCount}
             />
-            <QuickLink href="/student/attendance" label="Attendance" />
             <QuickLink href="/student/certificate" label="Certificate" />
           </div>
         </div>
       </section>
 
-<section className="grid grid-cols-2 gap-4 md:gap-5 xl:grid-cols-4">
-  {stats.map((stat) => (
-    <div
-      key={stat.title}
-      className={`rounded-[1.75rem] border p-4 shadow-sm sm:p-5 ${stat.soft}`}
-    >
-      <div className={`h-2 w-24 rounded-full bg-gradient-to-r ${stat.tone}`} />
+      <section className="grid grid-cols-2 gap-4 md:gap-5 xl:grid-cols-4">
+        {stats.map((stat) => (
+          <div
+            key={stat.title}
+            className={`rounded-[1.75rem] border p-4 shadow-sm sm:p-5 ${stat.soft}`}
+          >
+            <div className={`h-2 w-24 rounded-full bg-gradient-to-r ${stat.tone}`} />
 
-      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-sm">
-        {stat.title}
-      </p>
+            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-sm">
+              {stat.title}
+            </p>
 
-      <h2 className={`mt-3 text-xl font-bold sm:text-2xl ${stat.valueColor}`}>
-        {stat.value}
-      </h2>
+            <h2 className={`mt-3 text-xl font-bold sm:text-2xl ${stat.valueColor}`}>
+              {stat.value}
+            </h2>
 
-      <p className="mt-3 text-sm leading-6 text-slate-600">
-        {stat.note}
-      </p>
-    </div>
-  ))}
-</section>
+            <p className="mt-3 text-sm leading-6 text-slate-600">{stat.note}</p>
+          </div>
+        ))}
+      </section>
 
       <section className="grid gap-6 xl:grid-cols-3">
         <div className="rounded-[2rem] border border-emerald-100 bg-white/90 p-6 shadow-sm xl:col-span-2">
@@ -164,6 +191,26 @@ export default async function StudentDashboardPage() {
               Active Student
             </span>
           </div>
+
+          <ActivityCard
+            title={
+              unreadAssignmentsCount > 0
+                ? "New assignment available"
+                : "No new assignment yet"
+            }
+            text={
+              unreadAssignmentsCount > 0
+                ? `You have ${unreadAssignmentsCount} new assignment${unreadAssignmentsCount === 1 ? "" : "s"} to check from your teacher.`
+                : "No unread assignment is waiting for you right now."
+            }
+            tint={
+              unreadAssignmentsCount > 0
+                ? "bg-red-50 border-red-200"
+                : "bg-emerald-50 border-emerald-100"
+            }
+          />
+
+          <div className="mt-6 space-y-4">
             <ActivityCard
               title={
                 reviewedSubmissionsCount > 0
@@ -178,10 +225,10 @@ export default async function StudentDashboardPage() {
               tint={
                 reviewedSubmissionsCount > 0
                   ? "bg-red-50 border-red-200"
-                  : "bg-emerald-50 border-emerald-100"
+                  : "bg-lime-50 border-lime-100"
               }
             />
-          <div className="mt-6 space-y-4">
+
             <ActivityCard
               title="Training materials available"
               text={`You currently have ${resourcesCount} resources available for your assigned track.`}
@@ -189,21 +236,21 @@ export default async function StudentDashboardPage() {
             />
 
             <ActivityCard
-              title="Submission tracker updated"
-              text={`You currently have ${submissionCount} submission${submissionCount === 1 ? "" : "s"} in the system.`}
-              tint="bg-lime-50 border-lime-100"
+              title="Assignment tracker updated"
+              text={`You currently have ${assignmentsCount} assignment${assignmentsCount === 1 ? "" : "s"} available in the system.`}
+              tint="bg-green-50 border-green-100"
             />
 
             <ActivityCard
               title="Attendance performance updated"
               text={`Your attendance rate is ${metrics.attendancePercentage}% with ${metrics.presentCount} present record${metrics.presentCount === 1 ? "" : "s"} and ${metrics.absentCount} absent record${metrics.absentCount === 1 ? "" : "s"}.`}
-              tint="bg-green-50 border-green-100"
+              tint="bg-emerald-50 border-emerald-100"
             />
 
             <ActivityCard
               title="Certificate progress updated"
               text={`Your current certificate status is ${certificateStatus}.`}
-              tint="bg-emerald-50 border-emerald-100"
+              tint="bg-lime-50 border-lime-100"
             />
           </div>
         </div>
@@ -217,11 +264,9 @@ export default async function StudentDashboardPage() {
             <div className="mt-5 space-y-4">
               <SummaryRow label="Track" value={student.track} />
               <SummaryRow label="Attendance" value={`${metrics.attendancePercentage}%`} />
+              <SummaryRow label="Assignments" value={`${assignmentsCount} total`} />
               <SummaryRow label="Certificate" value={certificateStatus} />
-              <SummaryRow
-                label="Submissions"
-                value={`${submissionCount} total`}
-              />
+              <SummaryRow label="Submissions" value={`${submissionCount} total`} />
             </div>
           </div>
 
@@ -233,6 +278,10 @@ export default async function StudentDashboardPage() {
             <div className="mt-5 space-y-3">
               <ActionLink href="/student/resources" primary>
                 View Materials
+              </ActionLink>
+
+              <ActionLink href="/student/assignments">
+                View Assignments
               </ActionLink>
 
               <ActionLink href="/student/submissions">

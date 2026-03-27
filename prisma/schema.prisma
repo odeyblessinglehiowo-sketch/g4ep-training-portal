@@ -52,6 +52,7 @@ model Student {
   submissions       Submission[]
   certificates      Certificate[]
   attendanceRecords AttendanceRecord[]
+  assignmentViews   AssignmentView[]
 }
 
 model Teacher {
@@ -62,6 +63,7 @@ model Teacher {
 
   user               User                @relation(fields: [userId], references: [id])
   attendanceSessions AttendanceSession[]
+  assignments        Assignment[]
 }
 
 model Resource {
@@ -126,4 +128,35 @@ model AttendanceRecord {
   student Student           @relation(fields: [studentId], references: [id])
 
   @@unique([sessionId, studentId])
+}
+
+model Assignment {
+  id          String    @id @default(cuid())
+  title       String
+  question    String
+  track       String
+  teacherId   String
+  dueDate     DateTime?
+  isPublished Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  teacher Teacher          @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  views   AssignmentView[]
+
+  @@index([track])
+  @@index([teacherId])
+}
+
+model AssignmentView {
+  id           String    @id @default(cuid())
+  assignmentId String
+  studentId    String
+  seenAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@index([studentId])
 }

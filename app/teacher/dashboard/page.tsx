@@ -33,6 +33,14 @@ export default async function TeacherDashboardPage() {
     },
   });
 
+  const totalAssignments = await db.assignment.count({
+    where: {
+      track: teacher.track,
+      teacherId: teacher.id,
+      isPublished: true,
+    },
+  });
+
   const totalSubmissions = await db.submission.count({
     where: {
       student: {
@@ -41,7 +49,7 @@ export default async function TeacherDashboardPage() {
     },
   });
 
-    const pendingSubmissions = await db.submission.count({
+  const pendingSubmissions = await db.submission.count({
     where: {
       student: {
         track: teacher.track,
@@ -49,7 +57,7 @@ export default async function TeacherDashboardPage() {
       status: "PENDING",
     },
   });
-  
+
   const activeSessions = await db.attendanceSession.count({
     where: {
       track: teacher.track,
@@ -83,9 +91,9 @@ export default async function TeacherDashboardPage() {
       valueColor: "text-green-800",
     },
     {
-      title: "Active Attendance",
-      value: `${activeSessions}`,
-      note: "Current live attendance sessions",
+      title: "Assignments",
+      value: `${totalAssignments}`,
+      note: "Published tasks for your students",
       tone: "from-emerald-700 to-lime-500",
       soft: "bg-emerald-50 border-emerald-100",
       valueColor: "text-emerald-800",
@@ -107,46 +115,48 @@ export default async function TeacherDashboardPage() {
 
             <p className="mt-4 max-w-2xl text-sm leading-7 text-emerald-50/90 sm:text-base">
               Manage your learning track, support students, monitor attendance,
-              publish resources, and review project submissions from one clean
-              teaching workspace.
+              publish resources, create assignments, and review project
+              submissions from one clean teaching workspace.
             </p>
           </div>
 
           <div className="grid w-full grid-cols-2 gap-3 sm:max-w-md 2xl:w-auto">
-                       <QuickLink href="/teacher/attendance" label="Attendance" />
+            <QuickLink href="/teacher/attendance" label="Attendance" />
             <QuickLink href="/teacher/resources" label="Resources" />
+            <QuickLink
+              href="/teacher/assignments"
+              label="Assignments"
+              badge={totalAssignments}
+            />
             <QuickLink
               href="/teacher/submissions"
               label="Projects"
               badge={pendingSubmissions}
             />
-            <QuickLink href="/teacher/students" label="Students" />
           </div>
         </div>
       </section>
 
-     <section className="grid grid-cols-2 gap-4 md:gap-5 xl:grid-cols-4">
-  {stats.map((stat) => (
-    <div
-      key={stat.title}
-      className={`rounded-[1.75rem] border p-4 shadow-sm sm:p-5 ${stat.soft}`}
-    >
-      <div className={`h-2 w-24 rounded-full bg-gradient-to-r ${stat.tone}`} />
+      <section className="grid grid-cols-2 gap-4 md:gap-5 xl:grid-cols-4">
+        {stats.map((stat) => (
+          <div
+            key={stat.title}
+            className={`rounded-[1.75rem] border p-4 shadow-sm sm:p-5 ${stat.soft}`}
+          >
+            <div className={`h-2 w-24 rounded-full bg-gradient-to-r ${stat.tone}`} />
 
-      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-sm">
-        {stat.title}
-      </p>
+            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-sm">
+              {stat.title}
+            </p>
 
-      <h2 className={`mt-3 text-xl font-bold sm:text-2xl ${stat.valueColor}`}>
-        {stat.value}
-      </h2>
+            <h2 className={`mt-3 text-xl font-bold sm:text-2xl ${stat.valueColor}`}>
+              {stat.value}
+            </h2>
 
-      <p className="mt-3 text-sm leading-6 text-slate-600">
-        {stat.note}
-      </p>
-    </div>
-  ))}
-</section>
+            <p className="mt-3 text-sm leading-6 text-slate-600">{stat.note}</p>
+          </div>
+        ))}
+      </section>
 
       <section className="grid gap-6 xl:grid-cols-3">
         <div className="rounded-[2rem] border border-emerald-100 bg-white/90 p-6 shadow-sm xl:col-span-2">
@@ -181,9 +191,9 @@ export default async function TeacherDashboardPage() {
             />
 
             <ActionCard
-              href="/teacher/submissions"
-              title="Review Projects"
-              text="Approve, reject, and manage student submissions efficiently."
+              href="/teacher/assignments"
+              title="Create Assignment"
+              text="Post class tasks and instructions for students in your assigned track."
               tint="bg-green-50 border-green-100"
             />
           </div>
@@ -208,7 +218,7 @@ export default async function TeacherDashboardPage() {
               Recent Activity
             </p>
 
-                      <div className="mt-5 space-y-4">
+            <div className="mt-5 space-y-4">
               <ActivityItem
                 title={
                   pendingSubmissions > 0
@@ -228,21 +238,29 @@ export default async function TeacherDashboardPage() {
               />
 
               <ActivityItem
-                title="New resource uploaded"
-                text="Fresh training materials can now be accessed by students in your track."
-                tint="bg-emerald-50 border-emerald-100"
-              />
-
-              <ActivityItem
-                title="Student submitted project"
-                text="A learner submission is awaiting your review in the projects section."
+                title={
+                  totalAssignments > 0
+                    ? `${totalAssignments} assignment${totalAssignments === 1 ? "" : "s"} published`
+                    : "No assignments created yet"
+                }
+                text={
+                  totalAssignments > 0
+                    ? "Your students can now view the assignments you have posted for this track."
+                    : "You have not posted any assignment yet. Open the assignments page to create one."
+                }
                 tint="bg-lime-50 border-lime-100"
               />
 
               <ActivityItem
-                title="Attendance session created"
-                text="Your attendance workflow is ready for the next live class session."
+                title="Resource space ready"
+                text="Upload training materials so students in your track can access them quickly."
                 tint="bg-green-50 border-green-100"
+              />
+
+              <ActivityItem
+                title={`${activeSessions} active attendance session${activeSessions === 1 ? "" : "s"}`}
+                text="Your attendance workflow is ready for live class sessions and student check-ins."
+                tint="bg-emerald-50 border-emerald-100"
               />
             </div>
           </div>
@@ -261,8 +279,8 @@ export default async function TeacherDashboardPage() {
                 Manage Resources
               </QuickActionLink>
 
-              <QuickActionLink href="/teacher/attendance">
-                Open Attendance
+              <QuickActionLink href="/teacher/assignments">
+                Create Assignments
               </QuickActionLink>
 
               <QuickActionLink href="/teacher/submissions">

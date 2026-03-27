@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ReactNode } from "react";
 import { requireRole } from "@/lib/auth";
 import LogoutButton from "@/components/logout-button";
@@ -12,8 +11,7 @@ export default async function StudentLayout({
 }: {
   children: ReactNode;
 }) {
-  await requireRole("STUDENT");
-    const currentUser = await requireRole("STUDENT");
+  const currentUser = await requireRole("STUDENT");
 
   const studentUser = await db.user.findUnique({
     where: {
@@ -36,9 +34,32 @@ export default async function StudentLayout({
       })
     : 0;
 
+  const unreadAssignmentsCount = studentUser?.student
+    ? await db.assignment.count({
+        where: {
+          track: studentUser.student.track,
+          isPublished: true,
+          views: {
+            none: {
+              studentId: studentUser.student.id,
+              seenAt: {
+                not: null,
+              },
+            },
+          },
+        },
+      })
+    : 0;
+
   const navItems = [
     { name: "Dashboard", href: "/student/dashboard", short: "Home" },
     { name: "Resources", href: "/student/resources", short: "Resources" },
+    {
+      name: "Assignments",
+      href: "/student/assignments",
+      short: "Assignments",
+      badge: unreadAssignmentsCount,
+    },
     {
       name: "Submissions",
       href: "/student/submissions",
@@ -62,17 +83,18 @@ export default async function StudentLayout({
             <h2 className="mt-3 text-2xl font-bold">G4EP RISE</h2>
 
             <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-              Access your learning tools, attendance, projects, and certificate journey in one place.
+              Access your learning tools, assignments, attendance, projects, and
+              certificate journey in one place.
             </p>
           </div>
 
-         <PortalSideNav items={navItems} />
+          <PortalSideNav items={navItems} />
 
           <div className="mt-8 rounded-[1.75rem] border border-emerald-100 bg-gradient-to-r from-emerald-50 to-lime-50 p-4">
             <p className="text-sm font-semibold text-emerald-800">Need help?</p>
             <p className="mt-2 text-sm leading-6 text-slate-700">
               Reach out to your coordinator if you need help with materials,
-              submissions, attendance, or certificate updates.
+              assignments, submissions, attendance, or certificate updates.
             </p>
           </div>
         </aside>
@@ -90,21 +112,20 @@ export default async function StudentLayout({
               </div>
 
               <div className="flex w-full items-center justify-between gap-3 lg:w-auto lg:justify-end">
-  <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
-    Student
-  </span>
-  <LogoutButton />
-</div>
+                <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+                  Student
+                </span>
+                <LogoutButton />
+              </div>
             </div>
 
             <MobileDashboardNav items={navItems} />
           </div>
 
-        <div className="mt-5 space-y-6">{children}</div>
+          <div className="mt-5 space-y-6">{children}</div>
         </div>
       </div>
-         <PortalFooter />
+      <PortalFooter />
     </div>
-    
   );
 }

@@ -9,12 +9,31 @@ export default async function AdminDashboardPage() {
   const totalStudents = await db.student.count();
   const totalResources = await db.resource.count();
   const totalSubmissions = await db.submission.count();
+  const totalAssignments = await db.assignment.count({
+    where: {
+      isPublished: true,
+    },
+  });
+
+  const unreadAssignmentViews = await db.assignmentView.count({
+    where: {
+      seenAt: null,
+    },
+  });
 
   const issuedCertificates = await db.certificate.count({
     where: {
       status: "ISSUED",
     },
   });
+
+  const pendingSubmissions = await db.submission.count({
+    where: {
+      status: "PENDING",
+    },
+  });
+
+  const totalTeachers = await db.teacher.count();
 
   const stats = [
     {
@@ -34,9 +53,9 @@ export default async function AdminDashboardPage() {
       valueColor: "text-lime-800",
     },
     {
-      title: "Project Submissions",
-      value: `${totalSubmissions}`,
-      note: "Student assignments submitted",
+      title: "Assignments",
+      value: `${totalAssignments}`,
+      note: "Published across all tracks",
       tone: "from-green-600 to-emerald-600",
       soft: "bg-green-50 border-green-100",
       valueColor: "text-green-800",
@@ -65,42 +84,43 @@ export default async function AdminDashboardPage() {
             </h1>
 
             <p className="mt-4 max-w-2xl text-sm leading-7 text-emerald-50/90 sm:text-base">
-              Monitor students, resources, submissions, certificate activity,
-              and operational progress from one central management workspace.
+              Monitor students, resources, assignments, submissions,
+              certificate activity, and operational progress from one central
+              management workspace.
             </p>
           </div>
 
           <div className="grid w-full grid-cols-2 gap-3 sm:max-w-md 2xl:w-auto">
             <QuickLink href="/admin/students" label="Students" />
             <QuickLink href="/admin/resources" label="Resources" />
-            <QuickLink href="/admin/submissions" label="Projects" />
+            <QuickLink href="/admin/assignments" label="Assignments" />
             <QuickLink href="/admin/certificates" label="Certificates" />
           </div>
         </div>
       </section>
 
       <section className="grid grid-cols-2 gap-4 md:gap-5 xl:grid-cols-4">
-  {stats.map((stat) => (
-    <div
-      key={stat.title}
-      className={`rounded-[1.75rem] border p-4 shadow-sm sm:p-5 ${stat.soft}`}
-    >
-      <div className={`h-2 w-24 rounded-full bg-gradient-to-r ${stat.tone}`} />
+        {stats.map((stat) => (
+          <div
+            key={stat.title}
+            className={`rounded-[1.75rem] border p-4 shadow-sm sm:p-5 ${stat.soft}`}
+          >
+            <div className={`h-2 w-24 rounded-full bg-gradient-to-r ${stat.tone}`} />
 
-      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-sm">
-        {stat.title}
-      </p>
+            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-sm">
+              {stat.title}
+            </p>
 
-      <h2 className={`mt-3 text-xl font-bold sm:text-2xl ${stat.valueColor}`}>
-        {stat.value}
-      </h2>
+            <h2 className={`mt-3 text-xl font-bold sm:text-2xl ${stat.valueColor}`}>
+              {stat.value}
+            </h2>
 
-      <p className="mt-3 text-sm leading-6 text-slate-600">
-        {stat.note}
-      </p>
-    </div>
-  ))}
-</section>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              {stat.note}
+            </p>
+          </div>
+        ))}
+      </section>
 
       <section className="grid gap-6 xl:grid-cols-3">
         <div className="rounded-[2rem] border border-emerald-100 bg-white/90 p-6 shadow-sm xl:col-span-2">
@@ -121,20 +141,20 @@ export default async function AdminDashboardPage() {
 
           <div className="mt-6 space-y-4">
             <ActivityItem
-              title="New student batch imported"
-              text="Registration data can be reviewed and onboarding can continue from the admin panel."
+              title={`${totalAssignments} assignment${totalAssignments === 1 ? "" : "s"} published`}
+              text="Monitor assignment activity across all tracks and confirm teachers are posting tasks on time."
               tint="bg-emerald-50 border-emerald-100"
             />
 
             <ActivityItem
-              title="Learning resources are now live"
-              text="Students can instantly access uploaded materials by track."
+              title={`${unreadAssignmentViews} unread assignment view${unreadAssignmentViews === 1 ? "" : "s"} pending`}
+              text="Some students have not yet opened all assignments posted for their tracks."
               tint="bg-lime-50 border-lime-100"
             />
 
             <ActivityItem
-              title="Certificate verification is active"
-              text="Public verification links can now confirm issued certificates."
+              title={`${pendingSubmissions} submission${pendingSubmissions === 1 ? "" : "s"} awaiting review`}
+              text="Project review flow is active and still needs attention from teachers or admin."
               tint="bg-green-50 border-green-100"
             />
           </div>
@@ -153,6 +173,10 @@ export default async function AdminDashboardPage() {
 
               <AdminLinkButton href="/admin/resources">
                 Upload Resources
+              </AdminLinkButton>
+
+              <AdminLinkButton href="/admin/assignments">
+                Monitor Assignments
               </AdminLinkButton>
 
               <AdminLinkButton href="/admin/submissions">
@@ -176,13 +200,16 @@ export default async function AdminDashboardPage() {
 
             <div className="mt-5 space-y-3 text-sm leading-6 text-emerald-50/95">
               <p className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
-                Monitor platform performance and keep training operations smooth.
+                Track teaching activity across all assigned teachers and tracks.
               </p>
               <p className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
-                Review certificate issuance and submission flow regularly.
+                Review assignment and submission flow regularly to avoid delays.
               </p>
               <p className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
                 Keep resources updated so learners always have current materials.
+              </p>
+              <p className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
+                Current teacher count: {totalTeachers}
               </p>
             </div>
           </div>

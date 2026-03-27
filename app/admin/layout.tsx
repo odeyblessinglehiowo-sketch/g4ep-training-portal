@@ -1,28 +1,58 @@
 import LogoutButton from "@/components/logout-button";
-import Link from "next/link";
 import { ReactNode } from "react";
 import PortalFooter from "@/components/portal-footer";
 import PortalSideNav from "@/components/portal-side-nav";
 import MobileDashboardNav from "@/components/mobile-dashboard-nav";
+import { requireRole } from "@/lib/auth";
+import { db } from "@/lib/db";
 
-const navItems = [
-  { name: "Dashboard", href: "/admin/dashboard", short: "Home" },
-  { name: "Students", href: "/admin/students", short: "Students" },
-  { name: "Teachers", href: "/admin/teachers", short: "Teachers" },
-  { name: "Admins", href: "/admin/admins", short: "Admins" },
-  { name: "Resources", href: "/admin/resources", short: "Resources" },
-  { name: "Submissions", href: "/admin/submissions", short: "Projects" },
-  { name: "Certificates", href: "/admin/certificates", short: "Certs" },
-  { name: "Attendance", href: "/admin/attendance", short: "Attendance" },
-  { name: "Leaderboard", href: "/admin/attendance/leaderboard", short: "Ranks" },
-  { name: "Users", href: "/admin/users", short: "Users" },
-];
-
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: ReactNode;
 }) {
+  await requireRole("ADMIN");
+
+  const totalAssignments = await db.assignment.count({
+    where: {
+      isPublished: true,
+    },
+  });
+
+  const pendingSubmissionCount = await db.submission.count({
+    where: {
+      status: "PENDING",
+    },
+  });
+
+  const navItems = [
+    { name: "Dashboard", href: "/admin/dashboard", short: "Home" },
+    { name: "Students", href: "/admin/students", short: "Students" },
+    { name: "Teachers", href: "/admin/teachers", short: "Teachers" },
+    { name: "Admins", href: "/admin/admins", short: "Admins" },
+    { name: "Resources", href: "/admin/resources", short: "Resources" },
+    {
+      name: "Assignments",
+      href: "/admin/assignments",
+      short: "Assignments",
+      badge: totalAssignments,
+    },
+    {
+      name: "Submissions",
+      href: "/admin/submissions",
+      short: "Projects",
+      badge: pendingSubmissionCount,
+    },
+    { name: "Certificates", href: "/admin/certificates", short: "Certs" },
+    { name: "Attendance", href: "/admin/attendance", short: "Attendance" },
+    {
+      name: "Leaderboard",
+      href: "/admin/attendance/leaderboard",
+      short: "Ranks",
+    },
+    { name: "Users", href: "/admin/users", short: "Users" },
+  ];
+
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#dcfce7,_#f8fafc_40%,_#ecfdf5_70%,_#d1fae5)]">
       <div className="mx-auto flex max-w-7xl gap-6 px-4 py-5 sm:px-6 lg:px-8">
@@ -35,17 +65,21 @@ export default function AdminLayout({
             <h2 className="mt-3 text-2xl font-bold">G4EP RISE</h2>
 
             <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-              Oversee training operations, users, attendance, submissions, certificates, and learning resources.
+              Oversee training operations, users, attendance, submissions,
+              assignments, certificates, and learning resources.
             </p>
           </div>
 
-         <PortalSideNav items={navItems} />
+          <PortalSideNav items={navItems} />
 
           <div className="mt-8 rounded-[1.75rem] border border-emerald-100 bg-gradient-to-r from-emerald-50 to-lime-50 p-4">
-            <p className="text-sm font-semibold text-emerald-800">Admin Notice</p>
+            <p className="text-sm font-semibold text-emerald-800">
+              Admin Notice
+            </p>
             <p className="mt-2 text-sm leading-6 text-slate-700">
-              Use this command center to manage participant progress, coordinate
-              learning flow, and keep training operations running smoothly.
+              Use this command center to manage participant progress,
+              assignment activity, coordinate learning flow, and keep training
+              operations running smoothly.
             </p>
           </div>
         </aside>
@@ -63,15 +97,14 @@ export default function AdminLayout({
               </div>
 
               <div className="flex w-full items-center justify-between gap-3 lg:w-auto lg:justify-end">
-  <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
-    Admin
-  </span>
-  <LogoutButton />
-</div>
+                <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+                  Admin
+                </span>
+                <LogoutButton />
+              </div>
             </div>
 
             <MobileDashboardNav items={navItems} />
-            
           </div>
 
           <div className="mt-5 space-y-6">{children}</div>
