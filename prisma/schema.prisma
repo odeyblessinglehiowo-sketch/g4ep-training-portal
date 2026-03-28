@@ -133,12 +133,16 @@ model AttendanceRecord {
 model Assignment {
   id          String    @id @default(cuid())
   title       String
-  question    String
+  question    String?
+  imageUrl    String?
+  linkUrl     String?
+  linkLabel   String?
   track       String
   teacherId   String
   dueDate     DateTime?
   isPublished Boolean   @default(true)
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
 
   teacher Teacher          @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   views   AssignmentView[]
@@ -153,6 +157,7 @@ model AssignmentView {
   studentId    String
   seenAt       DateTime?
   createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
 
   assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   student    Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)

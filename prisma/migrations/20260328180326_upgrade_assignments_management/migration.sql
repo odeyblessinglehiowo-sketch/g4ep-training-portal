@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE "Assignment" ADD COLUMN     "imageUrl" TEXT,
+ADD COLUMN     "linkLabel" TEXT,
+ADD COLUMN     "linkUrl" TEXT,
+ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ALTER COLUMN "question" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "AssignmentView" ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

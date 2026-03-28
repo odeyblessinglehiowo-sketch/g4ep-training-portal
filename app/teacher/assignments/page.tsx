@@ -1,6 +1,11 @@
+import Link from "next/link";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { createAssignment } from "./actions";
+import {
+  createAssignment,
+  deleteAssignment,
+  toggleAssignmentPublish,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +21,7 @@ export default async function TeacherAssignmentsPage() {
     },
   });
 
-  if (!teacherUser || !teacherUser.teacher) {
+  if (!teacherUser?.teacher) {
     throw new Error("Teacher profile not found.");
   }
 
@@ -32,17 +37,41 @@ export default async function TeacherAssignmentsPage() {
     where: {
       teacherId: teacher.id,
       track: teacher.track,
-      isPublished: true,
     },
     include: {
-      views: true,
+      views: {
+        include: {
+          student: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
     },
   });
 
-  const totalAssignments = assignments.length;
+  const activeAssignments = assignments.filter(
+    (assignment) => assignment.isPublished
+  );
+
+  const assignmentsWithStats = assignments.map((assignment) => {
+    const seenCount = assignment.views.filter((view) => view.seenAt !== null).length;
+    const unreadCount = Math.max(totalStudents - seenCount, 0);
+
+    return {
+      ...assignment,
+      seenCount,
+      unreadCount,
+    };
+  });
+
+  const unreadAssignmentBadgeCount = assignmentsWithStats.filter(
+    (assignment) => assignment.unreadCount > 0 && assignment.isPublished
+  ).length;
 
   return (
     <main className="space-y-6">
@@ -58,22 +87,16 @@ export default async function TeacherAssignmentsPage() {
             </h1>
 
             <p className="mt-4 max-w-2xl text-sm leading-7 text-emerald-50/90 sm:text-base">
-              Post assignment questions and instructions for students in your
-              assigned track. Students will receive a notification badge when a
-              new assignment is available.
+              Create assignments with text, image links, and useful URLs. Track
+              who has seen each assignment and manage your class activity from one place.
             </p>
           </div>
 
           <div className="grid w-full grid-cols-2 gap-3 sm:max-w-md xl:w-auto">
             <StatMini label="Track" value={teacher.track} />
             <StatMini label="Students" value={`${totalStudents}`} />
-            <StatMini label="Assignments" value={`${totalAssignments}`} />
-            <StatMini
-              label="Unread by Students"
-              value={`${assignments.reduce((total, assignment) => {
-                return total + Math.max(totalStudents - assignment.views.length, 0);
-              }, 0)}`}
-            />
+            <StatMini label="Assignments" value={`${activeAssignments.length}`} />
+            <StatMini label="Unread Alerts" value={`${unreadAssignmentBadgeCount}`} />
           </div>
         </div>
       </section>
@@ -90,8 +113,7 @@ export default async function TeacherAssignmentsPage() {
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Add a title and full instruction for your students. You can also
-              set an optional due date.
+              Add a written task, optional image URL, optional link, and due date.
             </p>
 
             <form action={createAssignment} className="mt-6 space-y-5">
@@ -102,7 +124,6 @@ export default async function TeacherAssignmentsPage() {
                 >
                   Assignment Title
                 </label>
-
                 <input
                   id="title"
                   name="title"
@@ -120,13 +141,59 @@ export default async function TeacherAssignmentsPage() {
                 >
                   Assignment Question / Instructions
                 </label>
-
                 <textarea
                   id="question"
                   name="question"
-                  rows={8}
+                  rows={6}
                   placeholder="Write the full assignment task, instructions, and any important details students should follow..."
-                  required
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="imageUrl"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
+                  Image URL <span className="text-slate-400">(Optional)</span>
+                </label>
+                <input
+                  id="imageUrl"
+                  name="imageUrl"
+                  type="url"
+                  placeholder="https://example.com/assignment-image.jpg"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="linkUrl"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
+                  Link URL <span className="text-slate-400">(Optional)</span>
+                </label>
+                <input
+                  id="linkUrl"
+                  name="linkUrl"
+                  type="url"
+                  placeholder="https://example.com/reference-link"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="linkLabel"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
+                  Link Label <span className="text-slate-400">(Optional)</span>
+                </label>
+                <input
+                  id="linkLabel"
+                  name="linkLabel"
+                  type="text"
+                  placeholder="e.g. Figma file, Example site, Starter files"
                   className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
                 />
               </div>
@@ -138,7 +205,6 @@ export default async function TeacherAssignmentsPage() {
                 >
                   Due Date <span className="text-slate-400">(Optional)</span>
                 </label>
-
                 <input
                   id="dueDate"
                   name="dueDate"
@@ -170,77 +236,128 @@ export default async function TeacherAssignmentsPage() {
               </div>
 
               <span className="rounded-full bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.15em] text-emerald-700">
-                {totalAssignments} Total
+                {assignments.length} Total
               </span>
             </div>
 
             <div className="mt-6 space-y-4">
-              {assignments.length > 0 ? (
-                assignments.map((assignment) => {
-                  const seenCount = assignment.views.filter(
-                    (view) => view.seenAt !== null
-                  ).length;
+              {assignmentsWithStats.length > 0 ? (
+                assignmentsWithStats.map((assignment) => (
+                  <article
+                    key={assignment.id}
+                    className="rounded-[1.75rem] border border-slate-200 bg-slate-50/70 p-5"
+                  >
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-lg font-bold text-slate-900">
+                            {assignment.title}
+                          </h3>
 
-                  const unseenCount = Math.max(totalStudents - seenCount, 0);
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                              assignment.isPublished
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-slate-200 text-slate-700"
+                            }`}
+                          >
+                            {assignment.isPublished ? "Published" : "Unpublished"}
+                          </span>
 
-                  return (
-                    <article
-                      key={assignment.id}
-                      className="rounded-[1.75rem] border border-slate-200 bg-slate-50/70 p-5"
-                    >
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-lg font-bold text-slate-900">
-                              {assignment.title}
-                            </h3>
-
-                            <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                              Published
+                          {assignment.unreadCount > 0 && assignment.isPublished && (
+                            <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">
+                              {assignment.unreadCount} unread
                             </span>
+                          )}
+                        </div>
 
-                            {unseenCount > 0 && (
-                              <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">
-                                {unseenCount} unread
-                              </span>
-                            )}
-                          </div>
-
+                        {assignment.question && (
                           <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">
                             {assignment.question}
                           </p>
-                        </div>
+                        )}
 
-                        <div className="grid shrink-0 gap-2 text-sm lg:min-w-[210px]">
-                          <InfoPill
-                            label="Track"
-                            value={assignment.track}
-                            tone="bg-emerald-50 text-emerald-700"
-                          />
-                          <InfoPill
-                            label="Created"
-                            value={formatDateTime(assignment.createdAt)}
-                            tone="bg-lime-50 text-lime-700"
-                          />
-                          <InfoPill
-                            label="Due"
-                            value={
-                              assignment.dueDate
-                                ? formatDateTime(assignment.dueDate)
-                                : "No deadline"
-                            }
-                            tone="bg-green-50 text-green-700"
-                          />
-                          <InfoPill
-                            label="Seen"
-                            value={`${seenCount}/${totalStudents} students`}
-                            tone="bg-slate-100 text-slate-700"
-                          />
+                        <div className="mt-4 flex flex-wrap gap-3">
+                          <Link
+                            href={`/teacher/assignments/${assignment.id}`}
+                            className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                          >
+                            View Details
+                          </Link>
+
+                          <Link
+                            href={`/teacher/assignments/${assignment.id}/edit`}
+                            className="rounded-xl bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-300"
+                          >
+                            Edit
+                          </Link>
+
+                          <form action={toggleAssignmentPublish}>
+                            <input
+                              type="hidden"
+                              name="assignmentId"
+                              value={assignment.id}
+                            />
+                            <button
+                              type="submit"
+                              className="rounded-xl bg-lime-100 px-4 py-2 text-sm font-semibold text-lime-800 transition hover:bg-lime-200"
+                            >
+                              {assignment.isPublished ? "Unpublish" : "Publish"}
+                            </button>
+                          </form>
+
+                          <form action={deleteAssignment}>
+                            <input
+                              type="hidden"
+                              name="assignmentId"
+                              value={assignment.id}
+                            />
+                            <button
+                              type="submit"
+                              className="rounded-xl bg-red-100 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-200"
+                            >
+                              Delete
+                            </button>
+                          </form>
                         </div>
                       </div>
-                    </article>
-                  );
-                })
+
+                      <div className="grid shrink-0 gap-2 text-sm lg:min-w-[220px]">
+                        <InfoPill
+                          label="Track"
+                          value={assignment.track}
+                          tone="bg-emerald-50 text-emerald-700"
+                        />
+                        <InfoPill
+                          label="Created"
+                          value={formatDateTime(assignment.createdAt)}
+                          tone="bg-lime-50 text-lime-700"
+                        />
+                        <InfoPill
+                          label="Due"
+                          value={
+                            assignment.dueDate
+                              ? formatDateTime(assignment.dueDate)
+                              : "No deadline"
+                          }
+                          tone="bg-green-50 text-green-700"
+                        />
+                        <Link
+                          href={`/teacher/assignments/${assignment.id}#seen-students`}
+                          className="rounded-2xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                        >
+                          Seen: {assignment.seenCount}/{totalStudents}
+                        </Link>
+                        <Link
+                          href={`/teacher/assignments/${assignment.id}#unread-students`}
+                          className="rounded-2xl bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+                        >
+                          Unread: {assignment.unreadCount}
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))
               ) : (
                 <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
                   <h3 className="text-lg font-bold text-slate-900">
@@ -248,7 +365,6 @@ export default async function TeacherAssignmentsPage() {
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     You have not published any assignment for this track yet.
-                    Use the form to create your first one.
                   </p>
                 </div>
               )}

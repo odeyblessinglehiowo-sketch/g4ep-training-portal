@@ -13,17 +13,49 @@ export default async function AdminLayout({
 }) {
   await requireRole("ADMIN");
 
-  const totalAssignments = await db.assignment.count({
-    where: {
-      isPublished: true,
-    },
-  });
-
   const pendingSubmissionCount = await db.submission.count({
     where: {
       status: "PENDING",
     },
   });
+
+  const assignments = await db.assignment.findMany({
+    where: {
+      isPublished: true,
+    },
+    select: {
+      id: true,
+      track: true,
+      views: {
+        select: {
+          seenAt: true,
+        },
+      },
+    },
+  });
+
+  const studentCountsByTrackRows = await db.student.groupBy({
+    by: ["track"],
+    _count: {
+      _all: true,
+    },
+  });
+
+  const studentCountMap = new Map(
+    studentCountsByTrackRows.map((row) => [row.track, row._count._all])
+  );
+
+  const unreadAssignmentBadgeCount = assignments.filter((assignment) => {
+    const totalStudentsInTrack = studentCountMap.get(assignment.track) ?? 0;
+
+    const seenCount = assignment.views.filter(
+      (view) => view.seenAt !== null
+    ).length;
+
+    const unreadCount = Math.max(totalStudentsInTrack - seenCount, 0);
+
+    return unreadCount > 0;
+  }).length;
 
   const navItems = [
     { name: "Dashboard", href: "/admin/dashboard", short: "Home" },
@@ -35,7 +67,7 @@ export default async function AdminLayout({
       name: "Assignments",
       href: "/admin/assignments",
       short: "Assignments",
-      badge: totalAssignments,
+      badge: unreadAssignmentBadgeCount,
     },
     {
       name: "Submissions",
