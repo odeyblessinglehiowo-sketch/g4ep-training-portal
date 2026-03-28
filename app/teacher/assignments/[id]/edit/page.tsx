@@ -121,27 +121,27 @@ export default async function TeacherEditAssignmentPage({
             />
           </div>
 
-          {assignment.imageUrl && (
+          {assignment.attachmentUrl && (
             <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
               <p className="text-sm font-semibold text-slate-700">
                 Current Attachment
               </p>
 
               <div className="mt-3">
-                {isImageFile(assignment.imageUrl) ? (
+                {isImageFile(assignment.attachmentUrl) ? (
                   <img
-                    src={assignment.imageUrl}
+                    src={assignment.attachmentUrl}
                     alt={assignment.title}
                     className="max-h-64 w-full rounded-2xl object-contain ring-1 ring-slate-200"
                   />
                 ) : (
                   <a
-                    href={assignment.imageUrl}
+                    href={assignment.attachmentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
                   >
-                    {isPdfFile(assignment.imageUrl) ? "Open Current PDF" : "Open Current Attachment"}
+                    {isPdfFile(assignment.attachmentUrl) ? "Open Current PDF" : "Open Current Attachment"}
                   </a>
                 )}
               </div>
@@ -178,7 +178,7 @@ export default async function TeacherEditAssignmentPage({
               id="imageUrl"
               name="imageUrl"
               type="url"
-              defaultValue={assignment.imageUrl ?? ""}
+              defaultValue={assignment.attachmentUrl ?? ""}
               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
             />
           </div>

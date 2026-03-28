@@ -63,7 +63,7 @@ export async function createAssignment(formData: FormData) {
     data: {
       title,
       question,
-      imageUrl: finalAttachmentUrl,
+      attachmentUrl: finalAttachmentUrl,
       linkUrl,
       linkLabel,
       track: teacherUser.teacher.track,
@@ -146,7 +146,7 @@ export async function updateAssignment(formData: FormData) {
     data: {
       title,
       question,
-      imageUrl: finalAttachmentUrl,
+      attachmentUrl: finalAttachmentUrl,
       linkUrl,
       linkLabel,
       dueDate: dueDateRaw ? new Date(dueDateRaw) : null,

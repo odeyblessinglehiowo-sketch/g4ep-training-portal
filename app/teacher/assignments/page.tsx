@@ -310,9 +310,9 @@ export default async function TeacherAssignmentsPage() {
                             </span>
                           )}
 
-                          {assignment.imageUrl && (
+                          {assignment.attachmentUrl && (
                             <span className="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-700">
-                              {isPdfFile(assignment.imageUrl) ? "PDF" : isImageFile(assignment.imageUrl) ? "Image" : "Attachment"}
+                              {isPdfFile(assignment.attachmentUrl) ? "PDF" : isImageFile(assignment.attachmentUrl) ? "Image" : "Attachment"}
                             </span>
                           )}
                         </div>
