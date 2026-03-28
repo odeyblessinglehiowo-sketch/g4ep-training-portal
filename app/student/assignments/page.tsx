@@ -3,6 +3,24 @@ import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
+function isPdfFile(url?: string | null) {
+  if (!url) return false;
+  return url.toLowerCase().includes(".pdf");
+}
+
+function isImageFile(url?: string | null) {
+  if (!url) return false;
+  const lower = url.toLowerCase();
+  return (
+    lower.includes(".jpg") ||
+    lower.includes(".jpeg") ||
+    lower.includes(".png") ||
+    lower.includes(".webp") ||
+    lower.includes(".gif") ||
+    lower.includes("/image/upload/")
+  );
+}
+
 export default async function StudentAssignmentsPage() {
   const currentUser = await requireRole("STUDENT");
 
@@ -85,7 +103,8 @@ export default async function StudentAssignmentsPage() {
 
             <p className="mt-4 max-w-2xl text-sm leading-7 text-emerald-50/90 sm:text-base">
               View all assignments posted for your track, including written
-              instructions, image references, and useful links from your teacher.
+              instructions, uploaded images or PDFs, and useful links from your
+              teacher.
             </p>
           </div>
 
@@ -127,6 +146,16 @@ export default async function StudentAssignmentsPage() {
                       <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
                         Active
                       </span>
+
+                      {assignment.imageUrl && (
+                        <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">
+                          {isPdfFile(assignment.imageUrl)
+                            ? "PDF"
+                            : isImageFile(assignment.imageUrl)
+                              ? "Image"
+                              : "Attachment"}
+                        </span>
+                      )}
                     </div>
 
                     <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
@@ -161,13 +190,30 @@ export default async function StudentAssignmentsPage() {
                     </ContentBlock>
                   )}
 
-                  {assignment.imageUrl && (
+                  {assignment.imageUrl && isImageFile(assignment.imageUrl) && (
                     <ContentBlock title="Reference Image">
                       <img
                         src={assignment.imageUrl}
                         alt={assignment.title}
                         className="max-h-[460px] w-full rounded-2xl object-contain ring-1 ring-slate-200"
                       />
+                    </ContentBlock>
+                  )}
+
+                  {assignment.imageUrl && !isImageFile(assignment.imageUrl) && (
+                    <ContentBlock
+                      title={isPdfFile(assignment.imageUrl) ? "PDF Attachment" : "Attachment"}
+                    >
+                      <a
+                        href={assignment.imageUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                      >
+                        {isPdfFile(assignment.imageUrl)
+                          ? "Open PDF"
+                          : "Open Attachment"}
+                      </a>
                     </ContentBlock>
                   )}
 

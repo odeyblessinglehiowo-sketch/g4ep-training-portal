@@ -5,6 +5,24 @@ import { deleteAssignment, toggleAssignmentPublish } from "../actions";
 
 export const dynamic = "force-dynamic";
 
+function isPdfFile(url?: string | null) {
+  if (!url) return false;
+  return url.toLowerCase().includes(".pdf");
+}
+
+function isImageFile(url?: string | null) {
+  if (!url) return false;
+  const lower = url.toLowerCase();
+  return (
+    lower.includes(".jpg") ||
+    lower.includes(".jpeg") ||
+    lower.includes(".png") ||
+    lower.includes(".webp") ||
+    lower.includes(".gif") ||
+    lower.includes("/image/upload/")
+  );
+}
+
 export default async function TeacherAssignmentDetailsPage({
   params,
 }: {
@@ -135,12 +153,26 @@ export default async function TeacherAssignmentDetailsPage({
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MiniCard label="Track" value={assignment.track} />
-        <MiniCard label="Seen" value={`${seenStudents.length}`} soft="bg-emerald-50 ring-emerald-100" valueClass="text-emerald-700" />
-        <MiniCard label="Unread" value={`${unreadStudents.length}`} soft="bg-red-50 ring-red-100" valueClass="text-red-700" />
+        <MiniCard
+          label="Seen"
+          value={`${seenStudents.length}`}
+          soft="bg-emerald-50 ring-emerald-100"
+          valueClass="text-emerald-700"
+        />
+        <MiniCard
+          label="Unread"
+          value={`${unreadStudents.length}`}
+          soft="bg-red-50 ring-red-100"
+          valueClass="text-red-700"
+        />
         <MiniCard
           label="Status"
           value={assignment.isPublished ? "Published" : "Unpublished"}
-          soft={assignment.isPublished ? "bg-lime-50 ring-lime-100" : "bg-slate-50 ring-slate-200"}
+          soft={
+            assignment.isPublished
+              ? "bg-lime-50 ring-lime-100"
+              : "bg-slate-50 ring-slate-200"
+          }
           valueClass={assignment.isPublished ? "text-lime-700" : "text-slate-700"}
         />
       </section>
@@ -157,13 +189,26 @@ export default async function TeacherAssignmentDetailsPage({
             </ContentBlock>
           )}
 
-          {assignment.imageUrl && (
-            <ContentBlock title="Assignment Image">
+          {assignment.imageUrl && isImageFile(assignment.imageUrl) && (
+            <ContentBlock title="Attachment Preview">
               <img
                 src={assignment.imageUrl}
                 alt={assignment.title}
                 className="max-h-[420px] w-full rounded-2xl object-contain ring-1 ring-slate-200"
               />
+            </ContentBlock>
+          )}
+
+          {assignment.imageUrl && !isImageFile(assignment.imageUrl) && (
+            <ContentBlock title={isPdfFile(assignment.imageUrl) ? "PDF Attachment" : "Attachment"}>
+              <a
+                href={assignment.imageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
+              >
+                {isPdfFile(assignment.imageUrl) ? "Open PDF" : "Open Attachment"}
+              </a>
             </ContentBlock>
           )}
 

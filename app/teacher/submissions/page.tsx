@@ -37,6 +37,7 @@ export default async function TeacherSubmissionsPage() {
           user: true,
         },
       },
+      assignment: true,
     },
   });
 
@@ -68,6 +69,12 @@ export default async function TeacherSubmissionsPage() {
                   <h3 className="text-lg font-bold text-slate-900">
                     {submission.title}
                   </h3>
+
+                  {submission.assignment && (
+                    <p className="mt-2 text-sm font-medium text-emerald-700">
+                      Assignment: {submission.assignment.title}
+                    </p>
+                  )}
 
                   <p className="mt-2 text-sm text-slate-600">
                     Student: {submission.student.user.name}

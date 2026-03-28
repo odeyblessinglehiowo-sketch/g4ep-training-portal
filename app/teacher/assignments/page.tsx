@@ -9,6 +9,24 @@ import {
 
 export const dynamic = "force-dynamic";
 
+function isPdfFile(url?: string | null) {
+  if (!url) return false;
+  return url.toLowerCase().includes(".pdf");
+}
+
+function isImageFile(url?: string | null) {
+  if (!url) return false;
+  const lower = url.toLowerCase();
+  return (
+    lower.includes(".jpg") ||
+    lower.includes(".jpeg") ||
+    lower.includes(".png") ||
+    lower.includes(".webp") ||
+    lower.includes(".gif") ||
+    lower.includes("/image/upload/")
+  );
+}
+
 export default async function TeacherAssignmentsPage() {
   const currentUser = await requireRole("TEACHER");
 
@@ -87,8 +105,7 @@ export default async function TeacherAssignmentsPage() {
             </h1>
 
             <p className="mt-4 max-w-2xl text-sm leading-7 text-emerald-50/90 sm:text-base">
-              Create assignments with text, image links, and useful URLs. Track
-              who has seen each assignment and manage your class activity from one place.
+              Create assignments with text, uploaded images or PDFs, manual attachment URLs, and useful links.
             </p>
           </div>
 
@@ -113,10 +130,14 @@ export default async function TeacherAssignmentsPage() {
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Add a written task, optional image URL, optional link, and due date.
+              Add written instructions, upload an image or PDF, attach a manual file URL, and add an optional support link.
             </p>
 
-            <form action={createAssignment} className="mt-6 space-y-5">
+            <form
+              action={createAssignment}
+              encType="multipart/form-data"
+              className="mt-6 space-y-5"
+            >
               <div>
                 <label
                   htmlFor="title"
@@ -152,16 +173,35 @@ export default async function TeacherAssignmentsPage() {
 
               <div>
                 <label
+                  htmlFor="uploadFile"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                >
+                  Upload Assignment File <span className="text-slate-400">(Optional)</span>
+                </label>
+                <input
+                  id="uploadFile"
+                  name="uploadFile"
+                  type="file"
+                  accept=".pdf,image/*"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500 file:mr-4 file:rounded-md file:border-0 file:bg-emerald-100 file:px-3 file:py-2 file:font-semibold file:text-emerald-700"
+                />
+                <p className="mt-2 text-xs text-slate-500">
+                  Upload an image or PDF directly from your device.
+                </p>
+              </div>
+
+              <div>
+                <label
                   htmlFor="imageUrl"
                   className="mb-2 block text-sm font-semibold text-slate-700"
                 >
-                  Image URL <span className="text-slate-400">(Optional)</span>
+                  Attachment URL <span className="text-slate-400">(Optional)</span>
                 </label>
                 <input
                   id="imageUrl"
                   name="imageUrl"
                   type="url"
-                  placeholder="https://example.com/assignment-image.jpg"
+                  placeholder="https://example.com/assignment-file.jpg or .pdf"
                   className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
                 />
               </div>
@@ -171,7 +211,7 @@ export default async function TeacherAssignmentsPage() {
                   htmlFor="linkUrl"
                   className="mb-2 block text-sm font-semibold text-slate-700"
                 >
-                  Link URL <span className="text-slate-400">(Optional)</span>
+                  Support Link <span className="text-slate-400">(Optional)</span>
                 </label>
                 <input
                   id="linkUrl"
@@ -267,6 +307,12 @@ export default async function TeacherAssignmentsPage() {
                           {assignment.unreadCount > 0 && assignment.isPublished && (
                             <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">
                               {assignment.unreadCount} unread
+                            </span>
+                          )}
+
+                          {assignment.imageUrl && (
+                            <span className="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-700">
+                              {isPdfFile(assignment.imageUrl) ? "PDF" : isImageFile(assignment.imageUrl) ? "Image" : "Attachment"}
                             </span>
                           )}
                         </div>

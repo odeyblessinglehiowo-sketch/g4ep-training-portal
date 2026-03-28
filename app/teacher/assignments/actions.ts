@@ -4,23 +4,28 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { uploadFileToCloudinary } from "@/lib/upload-file";
 
 function normalizeOptional(value: FormDataEntryValue | null) {
   const text = value?.toString().trim() ?? "";
   return text === "" ? null : text;
 }
 
-export async function createAssignment(formData: FormData) {
-  const currentUser = await requireRole("TEACHER");
-
-  const teacherUser = await db.user.findUnique({
+async function getTeacherUser(userId: string) {
+  return db.user.findUnique({
     where: {
-      id: currentUser.userId,
+      id: userId,
     },
     include: {
       teacher: true,
     },
   });
+}
+
+export async function createAssignment(formData: FormData) {
+  const currentUser = await requireRole("TEACHER");
+
+  const teacherUser = await getTeacherUser(currentUser.userId);
 
   if (!teacherUser?.teacher) {
     throw new Error("Teacher profile not found.");
@@ -28,18 +33,29 @@ export async function createAssignment(formData: FormData) {
 
   const title = formData.get("title")?.toString().trim() ?? "";
   const question = normalizeOptional(formData.get("question"));
-  const imageUrl = normalizeOptional(formData.get("imageUrl"));
+  const manualAttachmentUrl = normalizeOptional(formData.get("imageUrl"));
   const linkUrl = normalizeOptional(formData.get("linkUrl"));
   const linkLabel = normalizeOptional(formData.get("linkLabel"));
   const dueDateRaw = normalizeOptional(formData.get("dueDate"));
+  const uploadFile = formData.get("uploadFile");
 
   if (!title) {
     throw new Error("Assignment title is required.");
   }
 
-  if (!question && !imageUrl && !linkUrl) {
+  let finalAttachmentUrl = manualAttachmentUrl;
+
+  if (uploadFile instanceof File && uploadFile.size > 0) {
+    const uploaded = await uploadFileToCloudinary(
+      uploadFile,
+      "g4ep/assignments"
+    );
+    finalAttachmentUrl = uploaded?.secure_url || finalAttachmentUrl;
+  }
+
+  if (!question && !finalAttachmentUrl && !linkUrl) {
     throw new Error(
-      "Add at least one assignment content type: question, image URL, or link URL."
+      "Add at least one assignment content type: instructions, uploaded file/attachment URL, or link URL."
     );
   }
 
@@ -47,7 +63,7 @@ export async function createAssignment(formData: FormData) {
     data: {
       title,
       question,
-      imageUrl,
+      imageUrl: finalAttachmentUrl,
       linkUrl,
       linkLabel,
       track: teacherUser.teacher.track,
@@ -71,11 +87,12 @@ export async function updateAssignment(formData: FormData) {
   const assignmentId = formData.get("assignmentId")?.toString().trim() ?? "";
   const title = formData.get("title")?.toString().trim() ?? "";
   const question = normalizeOptional(formData.get("question"));
-  const imageUrl = normalizeOptional(formData.get("imageUrl"));
+  const manualAttachmentUrl = normalizeOptional(formData.get("imageUrl"));
   const linkUrl = normalizeOptional(formData.get("linkUrl"));
   const linkLabel = normalizeOptional(formData.get("linkLabel"));
   const dueDateRaw = normalizeOptional(formData.get("dueDate"));
   const isPublished = formData.get("isPublished")?.toString() === "true";
+  const uploadFile = formData.get("uploadFile");
 
   if (!assignmentId) {
     throw new Error("Assignment ID is required.");
@@ -83,12 +100,6 @@ export async function updateAssignment(formData: FormData) {
 
   if (!title) {
     throw new Error("Assignment title is required.");
-  }
-
-  if (!question && !imageUrl && !linkUrl) {
-    throw new Error(
-      "Add at least one assignment content type: question, image URL, or link URL."
-    );
   }
 
   const assignment = await db.assignment.findUnique({
@@ -105,18 +116,27 @@ export async function updateAssignment(formData: FormData) {
   }
 
   if (currentUser.role === "TEACHER") {
-    const teacherUser = await db.user.findUnique({
-      where: {
-        id: currentUser.userId,
-      },
-      include: {
-        teacher: true,
-      },
-    });
+    const teacherUser = await getTeacherUser(currentUser.userId);
 
     if (!teacherUser?.teacher || assignment.teacherId !== teacherUser.teacher.id) {
       throw new Error("You are not allowed to edit this assignment.");
     }
+  }
+
+  let finalAttachmentUrl = manualAttachmentUrl;
+
+  if (uploadFile instanceof File && uploadFile.size > 0) {
+    const uploaded = await uploadFileToCloudinary(
+      uploadFile,
+      "g4ep/assignments"
+    );
+    finalAttachmentUrl = uploaded?.secure_url || finalAttachmentUrl;
+  }
+
+  if (!question && !finalAttachmentUrl && !linkUrl) {
+    throw new Error(
+      "Add at least one assignment content type: instructions, uploaded file/attachment URL, or link URL."
+    );
   }
 
   await db.assignment.update({
@@ -126,7 +146,7 @@ export async function updateAssignment(formData: FormData) {
     data: {
       title,
       question,
-      imageUrl,
+      imageUrl: finalAttachmentUrl,
       linkUrl,
       linkLabel,
       dueDate: dueDateRaw ? new Date(dueDateRaw) : null,
@@ -171,14 +191,7 @@ export async function deleteAssignment(formData: FormData) {
   }
 
   if (currentUser.role === "TEACHER") {
-    const teacherUser = await db.user.findUnique({
-      where: {
-        id: currentUser.userId,
-      },
-      include: {
-        teacher: true,
-      },
-    });
+    const teacherUser = await getTeacherUser(currentUser.userId);
 
     if (!teacherUser?.teacher || assignment.teacherId !== teacherUser.teacher.id) {
       throw new Error("You are not allowed to delete this assignment.");
@@ -225,14 +238,7 @@ export async function toggleAssignmentPublish(formData: FormData) {
   }
 
   if (currentUser.role === "TEACHER") {
-    const teacherUser = await db.user.findUnique({
-      where: {
-        id: currentUser.userId,
-      },
-      include: {
-        teacher: true,
-      },
-    });
+    const teacherUser = await getTeacherUser(currentUser.userId);
 
     if (!teacherUser?.teacher || assignment.teacherId !== teacherUser.teacher.id) {
       throw new Error("You are not allowed to update this assignment.");

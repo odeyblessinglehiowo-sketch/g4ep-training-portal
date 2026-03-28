@@ -21,15 +21,29 @@ export default async function StudentSubmissionsPage() {
 
   const student = studentUser.student;
 
-  const submissions = await db.submission.findMany({
+  const assignments = await db.assignment.findMany({
     where: {
-      studentId: student.id,
+      track: student.track,
+      isPublished: true,
     },
     orderBy: {
       createdAt: "desc",
     },
   });
-   const reviewedSubmissionsCount = await db.submission.count({
+
+  const submissions = await db.submission.findMany({
+    where: {
+      studentId: student.id,
+    },
+    include: {
+      assignment: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const reviewedSubmissionsCount = await db.submission.count({
     where: {
       studentId: student.id,
       status: {
@@ -38,7 +52,8 @@ export default async function StudentSubmissionsPage() {
       studentSeenReview: false,
     },
   });
-    await db.submission.updateMany({
+
+  await db.submission.updateMany({
     where: {
       studentId: student.id,
       status: {
@@ -50,6 +65,7 @@ export default async function StudentSubmissionsPage() {
       studentSeenReview: true,
     },
   });
+
   return (
     <main className="space-y-6">
       <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
@@ -62,12 +78,16 @@ export default async function StudentSubmissionsPage() {
         </h1>
 
         <p className="mt-2 text-sm text-slate-600">
-          Upload your assignments and track their review status here.
+          Submit your work using a project link or by uploading an image, video, or PDF file.
         </p>
       </section>
 
       <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <form action={createSubmission} className="grid gap-4 md:grid-cols-2">
+        <form
+          action={createSubmission}
+          encType="multipart/form-data"
+          className="grid gap-4 md:grid-cols-2"
+        >
           <input
             name="title"
             type="text"
@@ -75,12 +95,40 @@ export default async function StudentSubmissionsPage() {
             className="rounded-lg border border-slate-300 px-4 py-2 outline-none transition focus:border-green-700"
           />
 
+          <select
+            name="assignmentId"
+            className="rounded-lg border border-slate-300 px-4 py-2 outline-none transition focus:border-green-700"
+            defaultValue=""
+          >
+            <option value="">Select Assignment (Optional)</option>
+            {assignments.map((assignment) => (
+              <option key={assignment.id} value={assignment.id}>
+                {assignment.title}
+              </option>
+            ))}
+          </select>
+
           <input
             name="fileUrl"
-            type="text"
-            placeholder="Project Link"
-            className="rounded-lg border border-slate-300 px-4 py-2 outline-none transition focus:border-green-700"
+            type="url"
+            placeholder="Project Link (optional if uploading file)"
+            className="rounded-lg border border-slate-300 px-4 py-2 outline-none transition focus:border-green-700 md:col-span-2"
           />
+
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
+              Upload File
+            </label>
+            <input
+              name="uploadFile"
+              type="file"
+              accept=".pdf,image/*,video/*"
+              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none transition focus:border-green-700 file:mr-4 file:rounded-md file:border-0 file:bg-emerald-100 file:px-3 file:py-2 file:font-semibold file:text-emerald-700"
+            />
+            <p className="mt-2 text-xs text-slate-500">
+              You can upload PDF, image, or video files. You can also still paste a link.
+            </p>
+          </div>
 
           <button
             type="submit"
@@ -90,7 +138,8 @@ export default async function StudentSubmissionsPage() {
           </button>
         </form>
       </section>
-       {reviewedSubmissionsCount > 0 && (
+
+      {reviewedSubmissionsCount > 0 && (
         <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
             Review Update
@@ -107,6 +156,7 @@ export default async function StudentSubmissionsPage() {
           </p>
         </section>
       )}
+
       <section className="grid gap-6">
         {submissions.length > 0 ? (
           submissions.map((submission) => (
@@ -132,9 +182,14 @@ export default async function StudentSubmissionsPage() {
                 </span>
               </div>
 
+              {submission.assignment && (
+                <p className="mt-2 text-sm font-medium text-emerald-700">
+                  Assignment: {submission.assignment.title}
+                </p>
+              )}
+
               <p className="mt-3 text-sm text-slate-600">
-                Submitted on{" "}
-                {new Date(submission.createdAt).toLocaleDateString()}
+                Submitted on {new Date(submission.createdAt).toLocaleDateString()}
               </p>
 
               <a
@@ -170,7 +225,6 @@ export default async function StudentSubmissionsPage() {
             <p className="text-sm text-slate-600">No submissions yet.</p>
           </div>
         )}
-       
       </section>
     </main>
   );

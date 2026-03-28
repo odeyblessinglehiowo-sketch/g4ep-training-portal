@@ -5,6 +5,24 @@ import { updateAssignment } from "../../actions";
 
 export const dynamic = "force-dynamic";
 
+function isPdfFile(url?: string | null) {
+  if (!url) return false;
+  return url.toLowerCase().includes(".pdf");
+}
+
+function isImageFile(url?: string | null) {
+  if (!url) return false;
+  const lower = url.toLowerCase();
+  return (
+    lower.includes(".jpg") ||
+    lower.includes(".jpeg") ||
+    lower.includes(".png") ||
+    lower.includes(".webp") ||
+    lower.includes(".gif") ||
+    lower.includes("/image/upload/")
+  );
+}
+
 export default async function TeacherEditAssignmentPage({
   params,
 }: {
@@ -46,7 +64,7 @@ export default async function TeacherEditAssignmentPage({
           Update Assignment
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-emerald-50/90 sm:text-base">
-          Update your assignment content, image link, support link, due date,
+          Update your assignment content, uploaded attachment, support link, due date,
           and publish state.
         </p>
       </section>
@@ -63,7 +81,11 @@ export default async function TeacherEditAssignmentPage({
           </Link>
         </div>
 
-        <form action={updateAssignment} className="mt-6 space-y-5">
+        <form
+          action={updateAssignment}
+          encType="multipart/form-data"
+          className="mt-6 space-y-5"
+        >
           <input type="hidden" name="assignmentId" value={assignment.id} />
 
           <div>
@@ -99,12 +121,58 @@ export default async function TeacherEditAssignmentPage({
             />
           </div>
 
+          {assignment.imageUrl && (
+            <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
+              <p className="text-sm font-semibold text-slate-700">
+                Current Attachment
+              </p>
+
+              <div className="mt-3">
+                {isImageFile(assignment.imageUrl) ? (
+                  <img
+                    src={assignment.imageUrl}
+                    alt={assignment.title}
+                    className="max-h-64 w-full rounded-2xl object-contain ring-1 ring-slate-200"
+                  />
+                ) : (
+                  <a
+                    href={assignment.imageUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                  >
+                    {isPdfFile(assignment.imageUrl) ? "Open Current PDF" : "Open Current Attachment"}
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label
+              htmlFor="uploadFile"
+              className="mb-2 block text-sm font-semibold text-slate-700"
+            >
+              Upload New Assignment File
+            </label>
+            <input
+              id="uploadFile"
+              name="uploadFile"
+              type="file"
+              accept=".pdf,image/*"
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500 file:mr-4 file:rounded-md file:border-0 file:bg-emerald-100 file:px-3 file:py-2 file:font-semibold file:text-emerald-700"
+            />
+            <p className="mt-2 text-xs text-slate-500">
+              Uploading a new file will replace the current attachment URL below.
+            </p>
+          </div>
+
           <div>
             <label
               htmlFor="imageUrl"
               className="mb-2 block text-sm font-semibold text-slate-700"
             >
-              Image URL
+              Attachment URL
             </label>
             <input
               id="imageUrl"
@@ -120,7 +188,7 @@ export default async function TeacherEditAssignmentPage({
               htmlFor="linkUrl"
               className="mb-2 block text-sm font-semibold text-slate-700"
             >
-              Link URL
+              Support Link
             </label>
             <input
               id="linkUrl"

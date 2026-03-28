@@ -4,10 +4,71 @@ import { updateSubmissionStatus } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminSubmissionsPage() {
+export default async function AdminSubmissionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    q?: string;
+    track?: string;
+  }>;
+}) {
   await requireRole("ADMIN");
 
+  const params = await searchParams;
+  const q = params.q?.trim() ?? "";
+  const track = params.track ?? "ALL";
+
+  const trackRows = await db.student.findMany({
+    select: {
+      track: true,
+    },
+    distinct: ["track"],
+  });
+
+  const trackOptions = trackRows.map((row) => row.track).sort();
+
   const submissions = await db.submission.findMany({
+    where: {
+      AND: [
+        track !== "ALL"
+          ? {
+              student: {
+                track,
+              },
+            }
+          : {},
+        q
+          ? {
+              OR: [
+                {
+                  title: {
+                    contains: q,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  student: {
+                    user: {
+                      name: {
+                        contains: q,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                },
+                {
+                  assignment: {
+                    title: {
+                      contains: q,
+                      mode: "insensitive",
+                    },
+                  },
+                },
+              ],
+            }
+          : {},
+      ],
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -17,6 +78,7 @@ export default async function AdminSubmissionsPage() {
           user: true,
         },
       },
+      assignment: true,
     },
   });
 
@@ -48,26 +110,74 @@ export default async function AdminSubmissionsPage() {
         </p>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total Submissions" value={totalSubmissions} />
-        <StatCard
-          label="Pending"
-          value={pendingSubmissions}
-          tone="bg-yellow-50"
-          valueClass="text-yellow-700"
-        />
-        <StatCard
-          label="Approved"
-          value={approvedSubmissions}
-          tone="bg-emerald-50"
-          valueClass="text-emerald-700"
-        />
-        <StatCard
-          label="Rejected"
-          value={rejectedSubmissions}
-          tone="bg-red-50"
-          valueClass="text-red-600"
-        />
+      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Total Submissions" value={totalSubmissions} />
+          <StatCard
+            label="Pending"
+            value={pendingSubmissions}
+            tone="bg-yellow-50"
+            valueClass="text-yellow-700"
+          />
+          <StatCard
+            label="Approved"
+            value={approvedSubmissions}
+            tone="bg-emerald-50"
+            valueClass="text-emerald-700"
+          />
+          <StatCard
+            label="Rejected"
+            value={rejectedSubmissions}
+            tone="bg-red-50"
+            valueClass="text-red-600"
+          />
+        </section>
+
+        <section className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-bold text-slate-900">Search & Track Filter</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Search by student, submission title, or assignment title and filter by track.
+          </p>
+
+          <form className="mt-6 grid gap-4">
+            <input
+              name="q"
+              type="text"
+              defaultValue={q}
+              placeholder="Search student, project, or assignment"
+              className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-green-600"
+            />
+
+            <select
+              name="track"
+              defaultValue={track}
+              className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-green-600"
+            >
+              <option value="ALL">All Tracks</option>
+              {trackOptions.map((trackOption) => (
+                <option key={trackOption} value={trackOption}>
+                  {trackOption}
+                </option>
+              ))}
+            </select>
+
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                className="flex-1 rounded-xl bg-green-700 px-5 py-3 font-semibold text-white hover:bg-green-800"
+              >
+                Apply
+              </button>
+
+              <a
+                href="/admin/submissions"
+                className="flex-1 rounded-xl bg-slate-200 px-5 py-3 text-center font-semibold text-slate-800 hover:bg-slate-300"
+              >
+                Reset
+              </a>
+            </div>
+          </form>
+        </section>
       </section>
 
       <section className="grid gap-6">
@@ -96,6 +206,12 @@ export default async function AdminSubmissionsPage() {
                       {submission.status}
                     </span>
                   </div>
+
+                  {submission.assignment && (
+                    <p className="mt-3 text-sm font-medium text-emerald-700">
+                      Assignment: {submission.assignment.title}
+                    </p>
+                  )}
 
                   <div className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
                     <p>Student: {submission.student.user.name}</p>
