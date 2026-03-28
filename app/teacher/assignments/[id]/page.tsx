@@ -189,25 +189,27 @@ export default async function TeacherAssignmentDetailsPage({
             </ContentBlock>
           )}
 
-          {assignment.imageUrl && isImageFile(assignment.imageUrl) && (
+          {assignment.attachmentUrl && isImageFile(assignment.attachmentUrl) && (
             <ContentBlock title="Attachment Preview">
               <img
-                src={assignment.imageUrl}
+                src={assignment.attachmentUrl}
                 alt={assignment.title}
                 className="max-h-[420px] w-full rounded-2xl object-contain ring-1 ring-slate-200"
               />
             </ContentBlock>
           )}
 
-          {assignment.imageUrl && !isImageFile(assignment.imageUrl) && (
-            <ContentBlock title={isPdfFile(assignment.imageUrl) ? "PDF Attachment" : "Attachment"}>
+          {assignment.attachmentUrl && !isImageFile(assignment.attachmentUrl) && (
+            <ContentBlock
+              title={isPdfFile(assignment.attachmentUrl) ? "PDF Attachment" : "Attachment"}
+            >
               <a
-                href={assignment.imageUrl}
+                href={assignment.attachmentUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
               >
-                {isPdfFile(assignment.imageUrl) ? "Open PDF" : "Open Attachment"}
+                {isPdfFile(assignment.attachmentUrl) ? "Open PDF" : "Open Attachment"}
               </a>
             </ContentBlock>
           )}
