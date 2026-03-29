@@ -1,7 +1,6 @@
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { updateSubmissionStatus } from "@/app/admin/submissions/actions";
-import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -34,9 +33,6 @@ export default async function TeacherSubmissionsPage() {
       teacherNotifiedAt: new Date(),
     },
   });
-
-  revalidatePath("/teacher/submissions");
-  revalidatePath("/teacher/dashboard");
 
   const submissions = await db.submission.findMany({
     where: {

@@ -66,13 +66,16 @@ model Teacher {
   assignments        Assignment[]
 }
 
-model Resource {
+
+ model Resource {
   id        String   @id @default(cuid())
   title     String
+  fileUrl   String?
+  linkUrl   String?
   track     String
-  fileUrl   String
   createdAt DateTime @default(now())
 }
+
 
 model Submission {
   id                String           @id @default(cuid())
