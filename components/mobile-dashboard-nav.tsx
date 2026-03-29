@@ -18,6 +18,14 @@ export default function MobileDashboardNav({
   const pathname = usePathname();
 
   function isActive(href: string) {
+    if (href === "/admin/attendance") {
+      return pathname === "/admin/attendance";
+    }
+
+    if (href === "/admin/attendance/leaderboard") {
+      return pathname === "/admin/attendance/leaderboard";
+    }
+
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 

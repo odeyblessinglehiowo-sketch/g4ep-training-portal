@@ -13,6 +13,14 @@ export default function PortalSideNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
 
   function isActive(href: string) {
+    if (href === "/admin/attendance") {
+      return pathname === "/admin/attendance";
+    }
+
+    if (href === "/admin/attendance/leaderboard") {
+      return pathname === "/admin/attendance/leaderboard";
+    }
+
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
@@ -32,7 +40,9 @@ export default function PortalSideNav({ items }: { items: NavItem[] }) {
             }`}
           >
             <span className="flex items-center gap-3">
-              {active && <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />}
+              {active && (
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
+              )}
               <span>{item.name}</span>
             </span>
 

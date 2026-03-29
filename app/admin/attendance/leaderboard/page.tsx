@@ -3,187 +3,195 @@ import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminAttendancePage() {
+export default async function AdminAttendanceLeaderboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    q?: string;
+    track?: string;
+  }>;
+}) {
   await requireRole("ADMIN");
+  const params = await searchParams;
 
-  const sessions = await db.attendanceSession.findMany({
-    orderBy: {
-      createdAt: "desc",
+  const q = params.q?.trim() ?? "";
+  const track = params.track ?? "ALL";
+
+  const trackRows = await db.student.findMany({
+    select: {
+      track: true,
+    },
+    distinct: ["track"],
+  });
+
+  const trackOptions = trackRows.map((row) => row.track).sort();
+
+  const students = await db.student.findMany({
+    where: {
+      AND: [
+        track !== "ALL" ? { track } : {},
+        q
+          ? {
+              user: {
+                name: {
+                  contains: q,
+                  mode: "insensitive",
+                },
+              },
+            }
+          : {},
+      ],
     },
     include: {
-      teacher: {
-        include: {
-          user: true,
-        },
-      },
-      attendanceRecords: {
-        include: {
-          student: {
-            include: {
-              user: true,
-            },
-          },
-        },
-      },
+      user: true,
+      attendanceRecords: true,
     },
   });
 
-  const totalSessions = sessions.length;
-  const activeSessions = sessions.filter((session) => session.isActive).length;
-  const closedSessions = sessions.filter((session) => !session.isActive).length;
-  const totalCheckIns = sessions.reduce(
-    (sum, session) => sum + session.attendanceRecords.length,
-    0
-  );
+  const leaderboard = students
+    .map((student) => {
+      const presentCount = student.attendanceRecords.filter(
+        (record) => record.status === "PRESENT"
+      ).length;
+
+      const absentCount = student.attendanceRecords.filter(
+        (record) => record.status === "ABSENT"
+      ).length;
+
+      const total = presentCount + absentCount;
+      const percentage = total > 0 ? Math.round((presentCount / total) * 100) : 0;
+
+      return {
+        id: student.id,
+        name: student.user.name,
+        track: student.track,
+        percentage,
+        presentCount,
+        absentCount,
+        total,
+      };
+    })
+    .sort((a, b) => {
+      if (b.percentage !== a.percentage) return b.percentage - a.percentage;
+      if (b.presentCount !== a.presentCount) return b.presentCount - a.presentCount;
+      return a.name.localeCompare(b.name);
+    });
 
   return (
     <main className="space-y-6">
       <section className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-emerald-900 via-green-700 to-lime-500 p-6 text-white shadow-lg shadow-emerald-200/50 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50/90">
-          Attendance
+          Attendance Leaderboard
         </p>
 
         <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
-          Training Attendance Overview
+          Student Attendance Ranking
         </h1>
 
         <p className="mt-4 max-w-3xl text-sm leading-7 text-emerald-50/90 sm:text-base">
-          Review attendance sessions, monitor class participation, and track student
-          check-ins across all training tracks.
+          See attendance performance across all tracks, ranked from most present
+          to least present.
         </p>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total Sessions" value={totalSessions} />
-        <StatCard
-          label="Active Sessions"
-          value={activeSessions}
-          tone="bg-emerald-50"
-          valueClass="text-emerald-700"
-        />
-        <StatCard
-          label="Closed Sessions"
-          value={closedSessions}
-          tone="bg-slate-50"
-          valueClass="text-slate-700"
-        />
-        <StatCard
-          label="Total Check-ins"
-          value={totalCheckIns}
-          tone="bg-lime-50"
-          valueClass="text-lime-700"
-        />
+      <section className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-bold text-slate-900">Search & Track Filter</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Search students by name and filter the ranking by track.
+        </p>
+
+        <form className="mt-6 grid gap-4 md:grid-cols-3">
+          <input
+            name="q"
+            type="text"
+            defaultValue={q}
+            placeholder="Search student name"
+            className="rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-green-600"
+          />
+
+          <select
+            name="track"
+            defaultValue={track}
+            className="rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-green-600"
+          >
+            <option value="ALL">All Tracks</option>
+            {trackOptions.map((trackOption) => (
+              <option key={trackOption} value={trackOption}>
+                {trackOption}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              className="flex-1 rounded-xl bg-green-700 px-5 py-3 font-semibold text-white hover:bg-green-800"
+            >
+              Apply
+            </button>
+
+            <a
+              href="/admin/attendance/leaderboard"
+              className="flex-1 rounded-xl bg-slate-200 px-5 py-3 text-center font-semibold text-slate-800 hover:bg-slate-300"
+            >
+              Reset
+            </a>
+          </div>
+        </form>
       </section>
 
-      <section className="grid gap-6">
-        {sessions.length > 0 ? (
-          sessions.map((session) => (
-            <article
-              key={session.id}
-              className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm transition hover:shadow-md"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <h3 className="text-xl font-bold text-slate-900">
-                      {session.title}
-                    </h3>
+      <section className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-full border-separate border-spacing-y-3">
+            <thead>
+              <tr className="text-left text-sm font-semibold text-slate-500">
+                <th className="px-4 py-2">Rank</th>
+                <th className="px-4 py-2">Student Name</th>
+                <th className="px-4 py-2">Track</th>
+                <th className="px-4 py-2">Attendance %</th>
+                <th className="px-4 py-2">Present</th>
+                <th className="px-4 py-2">Absent</th>
+              </tr>
+            </thead>
 
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        session.isActive
-                          ? "bg-green-100 text-green-700"
-                          : "bg-slate-100 text-slate-700"
-                      }`}
-                    >
-                      {session.isActive ? "ACTIVE" : "CLOSED"}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
-                    <p>Track: {session.track}</p>
-                    <p>Teacher: {session.teacher.user.name}</p>
-                    <p>Session Code: {session.code}</p>
-                    <p>
-                      Ends: {new Date(session.endsAt).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 rounded-[1.5rem] border border-emerald-100 bg-emerald-50/50 p-5">
-                <p className="text-sm font-semibold uppercase tracking-[0.14em] text-emerald-700">
-                  Students Present
-                </p>
-
-                <h4 className="mt-2 text-2xl font-bold text-slate-900">
-                  {session.attendanceRecords.length}
-                </h4>
-              </div>
-
-              <div className="mt-6 grid gap-3">
-                {session.attendanceRecords.length > 0 ? (
-                  session.attendanceRecords.map((record) => (
-                    <div
-                      key={record.id}
-                      className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                          <p className="font-semibold text-slate-900">
-                            {record.student.user.name}
-                          </p>
-
-                          <div className="mt-2 grid gap-1 text-sm text-slate-600 sm:grid-cols-2">
-                            <p>Track: {record.student.track}</p>
-                            <p>
-                              Checked In:{" "}
-                              {new Date(record.checkedInAt).toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-
-                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                          {record.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-slate-600">
-                    No students checked in for this session yet.
-                  </p>
-                )}
-              </div>
-            </article>
-          ))
-        ) : (
-          <div className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
-            <p className="text-sm text-slate-600">
-              No attendance sessions recorded yet.
-            </p>
-          </div>
-        )}
+            <tbody>
+              {leaderboard.length > 0 ? (
+                leaderboard.map((student, index) => (
+                  <tr
+                    key={student.id}
+                    className="rounded-2xl bg-slate-50 ring-1 ring-slate-200"
+                  >
+                    <td className="px-4 py-4 font-bold text-slate-900">
+                      #{index + 1}
+                    </td>
+                    <td className="px-4 py-4 font-semibold text-slate-900">
+                      {student.name}
+                    </td>
+                    <td className="px-4 py-4 text-slate-700">{student.track}</td>
+                    <td className="px-4 py-4">
+                      <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
+                        {student.percentage}%
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 font-semibold text-green-700">
+                      {student.presentCount}
+                    </td>
+                    <td className="px-4 py-4 font-semibold text-red-600">
+                      {student.absentCount}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-4 py-6 text-sm text-slate-600">
+                    No students matched your current filters.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
     </main>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  tone = "bg-white",
-  valueClass = "text-slate-900",
-}: {
-  label: string;
-  value: string | number;
-  tone?: string;
-  valueClass?: string;
-}) {
-  return (
-    <div className={`rounded-[1.5rem] p-5 shadow-sm ring-1 ring-slate-200 ${tone}`}>
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className={`mt-2 text-3xl font-bold ${valueClass}`}>{value}</p>
-    </div>
   );
 }

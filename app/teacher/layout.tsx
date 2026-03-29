@@ -24,52 +24,16 @@ export default async function TeacherLayout({
 
   const teacher = teacherUser?.teacher;
 
-  const pendingSubmissionCount = teacher
+  const newSubmissionCount = teacher
     ? await db.submission.count({
         where: {
           student: {
             track: teacher.track,
           },
-          status: "PENDING",
+          teacherNotifiedAt: null,
         },
       })
     : 0;
-
-  const trackStudentCount = teacher
-    ? await db.student.count({
-        where: {
-          track: teacher.track,
-        },
-      })
-    : 0;
-
-  const assignments = teacher
-    ? await db.assignment.findMany({
-        where: {
-          teacherId: teacher.id,
-          track: teacher.track,
-          isPublished: true,
-        },
-        select: {
-          id: true,
-          views: {
-            select: {
-              seenAt: true,
-            },
-          },
-        },
-      })
-    : [];
-
-  const unreadAssignmentBadgeCount = assignments.filter((assignment) => {
-    const seenCount = assignment.views.filter(
-      (view) => view.seenAt !== null
-    ).length;
-
-    const unreadCount = Math.max(trackStudentCount - seenCount, 0);
-
-    return unreadCount > 0;
-  }).length;
 
   const navItems = [
     { name: "Dashboard", href: "/teacher/dashboard", short: "Home" },
@@ -79,14 +43,13 @@ export default async function TeacherLayout({
       name: "Assignments",
       href: "/teacher/assignments",
       short: "Assignments",
-      badge: unreadAssignmentBadgeCount,
     },
     { name: "Attendance", href: "/teacher/attendance", short: "Attendance" },
     {
       name: "Submissions",
       href: "/teacher/submissions",
       short: "Projects",
-      badge: pendingSubmissionCount,
+      badge: newSubmissionCount,
     },
   ];
 
