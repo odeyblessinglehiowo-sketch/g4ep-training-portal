@@ -46,7 +46,6 @@ export default async function TeacherResourcesPage() {
 
   return (
     <main className="space-y-6">
-      {/* HEADER */}
       <section className="rounded-2xl bg-white p-6 shadow">
         <h1 className="text-2xl font-bold">Manage Resources</h1>
         <p className="text-sm text-gray-600">
@@ -54,77 +53,135 @@ export default async function TeacherResourcesPage() {
         </p>
       </section>
 
-      {/* FORM */}
       <section className="rounded-2xl bg-white p-6 shadow">
-        <h2 className="font-bold text-lg mb-4">Upload Resource</h2>
+        <h2 className="mb-4 text-lg font-bold">Upload Resource</h2>
 
-        <form action={createTeacherResource} className="space-y-4">
+        <form
+          action={createTeacherResource}
+          encType="multipart/form-data"
+          className="space-y-4"
+        >
           <input
             name="title"
-            placeholder="Title"
-            className="w-full border p-3 rounded"
+            placeholder="Resource Title"
+            className="w-full rounded border p-3"
           />
 
           <input
-            name="fileUrl"
+            name="linkUrl"
             placeholder="Optional Link"
-            className="w-full border p-3 rounded"
+            className="w-full rounded border p-3"
           />
 
           <input
             type="file"
             name="file"
-            className="w-full border p-3 rounded"
+            className="w-full rounded border p-3"
           />
 
-          <button className="bg-green-700 text-white px-4 py-2 rounded">
-            Upload
+          <button
+            type="submit"
+            className="rounded bg-green-700 px-4 py-2 text-white"
+          >
+            Upload Resource
           </button>
         </form>
       </section>
 
-      {/* LIST */}
       <section className="grid gap-6">
-        {resources.map((resource) => (
-          <div key={resource.id} className="bg-white p-6 rounded shadow">
-            <h3 className="font-bold text-lg">{resource.title}</h3>
+        {resources.length > 0 ? (
+          resources.map((resource) => (
+            <div key={resource.id} className="rounded bg-white p-6 shadow">
+              <h3 className="text-lg font-bold">{resource.title}</h3>
 
-            <p className="text-sm text-gray-500 mt-1">
-              {new Date(resource.createdAt).toLocaleDateString()}
+              <p className="mt-1 text-sm text-gray-500">
+                {new Date(resource.createdAt).toLocaleDateString()}
+              </p>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {resource.fileUrl && isImageFile(resource.fileUrl) && (
+                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    Image
+                  </span>
+                )}
+
+                {resource.fileUrl && isPdfFile(resource.fileUrl) && (
+                  <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">
+                    PDF
+                  </span>
+                )}
+
+                {resource.fileUrl &&
+                  !isImageFile(resource.fileUrl) &&
+                  !isPdfFile(resource.fileUrl) && (
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                      File
+                    </span>
+                  )}
+
+                {resource.linkUrl && (
+                  <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
+                    Link
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-3">
+                {resource.fileUrl && isImageFile(resource.fileUrl) && (
+                  <a
+                    href={resource.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block rounded bg-green-700 px-4 py-2 text-white"
+                  >
+                    View Image
+                  </a>
+                )}
+
+                {resource.fileUrl && isPdfFile(resource.fileUrl) && (
+                  <a
+                    href={resource.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block rounded bg-green-700 px-4 py-2 text-white"
+                  >
+                    View PDF
+                  </a>
+                )}
+
+                {resource.fileUrl &&
+                  !isImageFile(resource.fileUrl) &&
+                  !isPdfFile(resource.fileUrl) && (
+                    <a
+                      href={resource.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block rounded bg-green-700 px-4 py-2 text-white"
+                    >
+                      Open File
+                    </a>
+                  )}
+
+                {resource.linkUrl && (
+                  <a
+                    href={resource.linkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block rounded bg-blue-600 px-4 py-2 text-white"
+                  >
+                    Open Link
+                  </a>
+                )}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="rounded bg-white p-6 shadow">
+            <p className="text-sm text-gray-600">
+              No resources uploaded yet for this track.
             </p>
-
-            {/* IMAGE */}
-            {resource.fileUrl && isImageFile(resource.fileUrl) && (
-  <img
-    src={resource.fileUrl}
-    className="mt-4 max-h-[300px] object-contain"
-  />
-)}
-
-{/* PDF */}
-{resource.fileUrl && isPdfFile(resource.fileUrl) && (
-  <a
-    href={resource.fileUrl}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="mt-4 inline-block bg-green-700 text-white px-4 py-2 rounded"
-  >
-    View PDF
-  </a>
-)}
-
-            {/* LINK */}
-            {resource.fileUrl && (
-              <a
-                href={resource.fileUrl}
-                target="_blank"
-                className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded"
-              >
-                Open Link
-              </a>
-            )}
           </div>
-        ))}
+        )}
       </section>
     </main>
   );
