@@ -1,5 +1,5 @@
 -- AlterTable
-ALTER TABLE "Assignment" ADD COLUMN     "imageUrl" TEXT,
+ALTER TABLE "Assignment" ADD COLUMN     "attachmentUrl" TEXT,
 ADD COLUMN     "linkLabel" TEXT,
 ADD COLUMN     "linkUrl" TEXT,
 ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

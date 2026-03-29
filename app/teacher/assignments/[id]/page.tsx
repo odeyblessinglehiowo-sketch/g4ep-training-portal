@@ -12,14 +12,18 @@ function isPdfFile(url?: string | null) {
 
 function isImageFile(url?: string | null) {
   if (!url) return false;
+
   const lower = url.toLowerCase();
+
+  // 🚨 VERY IMPORTANT: block PDFs first
+  if (lower.includes(".pdf")) return false;
+
   return (
-    lower.includes(".jpg") ||
-    lower.includes(".jpeg") ||
-    lower.includes(".png") ||
-    lower.includes(".webp") ||
-    lower.includes(".gif") ||
-    lower.includes("/image/upload/")
+    lower.endsWith(".jpg") ||
+    lower.endsWith(".jpeg") ||
+    lower.endsWith(".png") ||
+    lower.endsWith(".webp") ||
+    lower.endsWith(".gif")
   );
 }
 
