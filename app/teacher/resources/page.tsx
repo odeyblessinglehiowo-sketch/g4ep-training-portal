@@ -66,7 +66,7 @@ export default async function TeacherResourcesPage() {
           />
 
           <input
-            name="linkUrl"
+            name="fileUrl"
             placeholder="Optional Link"
             className="w-full border p-3 rounded"
           />
@@ -114,9 +114,9 @@ export default async function TeacherResourcesPage() {
 )}
 
             {/* LINK */}
-            {resource.linkUrl && (
+            {resource.fileUrl && (
               <a
-                href={resource.linkUrl}
+                href={resource.fileUrl}
                 target="_blank"
                 className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded"
               >

@@ -113,7 +113,7 @@ export default async function StudentResourcesPage() {
                       </span>
                     )}
 
-                  {resource.linkUrl && (
+                  {resource.fileUrl && (
                     <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
                       Link
                     </span>
@@ -157,9 +157,9 @@ export default async function StudentResourcesPage() {
                     </a>
                   )}
 
-                {resource.linkUrl && (
+                {resource.fileUrl && (
                   <a
-                    href={resource.linkUrl}
+                    href={resource.fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"

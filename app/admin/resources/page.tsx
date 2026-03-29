@@ -71,14 +71,16 @@ export default async function AdminResourcesPage() {
               Track: {resource.track}
             </p>
 
-            <a
-              href={resource.fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-block rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800"
-            >
-              View Resource
-            </a>
+            {resource.fileUrl && (
+  <a
+    href={resource.fileUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="mt-4 ml-3 inline-block rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+  >
+    Open Link
+  </a>
+)}
           </div>
         ))}
       </section>
