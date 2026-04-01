@@ -102,19 +102,19 @@ export default async function TeacherDashboardPage() {
 
   return (
     <main className="space-y-6">
-      <section className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-emerald-800 via-green-700 to-lime-500 p-6 text-white shadow-lg shadow-emerald-200/50 sm:p-8">
-        <div className="flex flex-col gap-6 2xl:flex-row 2xl:items-end 2xl:justify-between">
+      <section className="overflow-hidden rounded-[1rem] bg-gradient-to-r from-emerald-800 via-green-700 to-lime-500 p-3 text-white shadow-lg shadow-emerald-200/50 sm:p-4">
+        <div className="flex flex-col gap-2 2xl:flex-row 2xl:items-end 2xl:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50/90">
               Teacher Dashboard
             </p>
 
-            <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">
+            <h1 className="mt-3 text-2xl font-bold leading-tight sm:text-4xl">
               Welcome back, {teacherUser.name ?? "Teacher"}
             </h1>
 
             <p className="mt-4 max-w-2xl text-sm leading-7 text-emerald-50/90 sm:text-base">
-          
+          Manage your learning track, and support students from one clean teaching workspace.
             </p>
           </div>
 
