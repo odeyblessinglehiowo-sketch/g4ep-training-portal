@@ -114,9 +114,7 @@ export default async function TeacherDashboardPage() {
             </h1>
 
             <p className="mt-4 max-w-2xl text-sm leading-7 text-emerald-50/90 sm:text-base">
-              Manage your learning track, support students, monitor attendance,
-              publish resources, create assignments, and review project
-              submissions from one clean teaching workspace.
+          
             </p>
           </div>
 
