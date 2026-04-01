@@ -24,7 +24,6 @@ export default async function AdminLayout({
       isPublished: true,
     },
     select: {
-      id: true,
       track: true,
       views: {
         select: {
@@ -88,8 +87,6 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-lime-50">
       <div className="mx-auto flex max-w-[1400px] gap-5 px-4 py-4 sm:px-6 lg:px-8">
-
-        {/* SIDEBAR (DESKTOP) */}
         <aside className="hidden w-64 shrink-0 rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm lg:block">
           <div className="rounded-xl bg-gradient-to-br from-emerald-800 via-green-700 to-lime-500 p-4 text-white">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-100">
@@ -117,13 +114,9 @@ export default async function AdminLayout({
           </div>
         </aside>
 
-        {/* MAIN CONTENT */}
-        <div className="flex-1 min-w-0">
-
-          {/* TOP BAR */}
+        <div className="min-w-0 flex-1">
           <div className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm sm:px-5">
             <div className="flex items-center justify-between gap-3">
-
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-700">
                   Admin Workspace
@@ -133,24 +126,26 @@ export default async function AdminLayout({
                 </h1>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="hidden items-center gap-2 lg:flex">
                 <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                   Admin
                 </span>
                 <LogoutButton />
               </div>
+
+              <div className="lg:hidden">
+                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                  Admin
+                </span>
+              </div>
             </div>
 
-            {/* MOBILE NAV (Hamburger will live inside this component) */}
             <div className="mt-3 lg:hidden">
               <MobileDashboardNav items={navItems} />
             </div>
           </div>
 
-          {/* PAGE CONTENT */}
-          <div className="mt-4 space-y-5">
-            {children}
-          </div>
+          <div className="mt-4 space-y-5">{children}</div>
         </div>
       </div>
 
