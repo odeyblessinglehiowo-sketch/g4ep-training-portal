@@ -8,7 +8,6 @@ export default async function AdminDashboardPage() {
 
   const totalStudents = await db.student.count();
   const totalResources = await db.resource.count();
-  const totalSubmissions = await db.submission.count();
   const totalAssignments = await db.assignment.count({
     where: { isPublished: true },
   });
@@ -67,26 +66,24 @@ export default async function AdminDashboardPage() {
   ];
 
   return (
-    <main className="space-y-5">
-      <section className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-emerald-950 via-emerald-700 to-lime-500 px-5 py-5 text-white shadow-[0_20px_60px_-20px_rgba(16,185,129,0.55)] sm:px-6">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+    <main className="space-y-4">
+      <section className="overflow-hidden border border-emerald-200 bg-gradient-to-r from-emerald-950 via-emerald-700 to-lime-500 px-4 py-4 text-white shadow-[0_18px_45px_-22px_rgba(16,185,129,0.55)] sm:px-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-100/90">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-100/90">
               Admin Dashboard
             </p>
 
-            <h1 className="mt-2 text-2xl font-bold leading-tight sm:text-3xl">
+            <h1 className="mt-1.5 text-xl font-bold leading-tight sm:text-2xl">
               Training Command Center
             </h1>
 
-            <p className="mt-3 max-w-xl text-sm leading-6 text-emerald-50/90 sm:text-[15px]">
-              Monitor students, resources, assignments, submissions,
-              certificates, and overall training progress from one central
-              workspace.
+            <p className="mt-2 text-xs leading-5 text-emerald-50/90 sm:text-sm">
+              Monitor students from one central workspace.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:w-[320px]">
+          <div className="grid grid-cols-2 gap-2 sm:w-[280px]">
             <QuickLink href="/admin/students" label="Students" />
             <QuickLink href="/admin/resources" label="Resources" />
             <QuickLink href="/admin/submissions" label="Projects" />
@@ -95,50 +92,50 @@ export default async function AdminDashboardPage() {
         </div>
       </section>
 
-      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
         {stats.map((stat) => (
           <div
             key={stat.title}
-            className={`rounded-[1.5rem] border bg-gradient-to-br ${stat.soft} ${stat.border} p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md`}
+            className={`border bg-gradient-to-br ${stat.soft} ${stat.border} p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md`}
           >
             <div
-              className={`h-2 w-20 rounded-full bg-gradient-to-r ${stat.line}`}
+              className={`h-1.5 w-16 bg-gradient-to-r ${stat.line}`}
             />
 
-            <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 sm:text-xs">
+            <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-[11px]">
               {stat.title}
             </p>
 
-            <h2 className={`mt-2 text-xl font-bold sm:text-2xl ${stat.valueColor}`}>
+            <h2 className={`mt-1.5 text-lg font-bold sm:text-xl ${stat.valueColor}`}>
               {stat.value}
             </h2>
 
-            <p className="mt-2 text-xs leading-5 text-slate-600 sm:text-sm">
+            <p className="mt-1.5 text-[11px] leading-5 text-slate-600 sm:text-xs">
               {stat.note}
             </p>
           </div>
         ))}
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-3">
-        <div className="rounded-[2rem] border border-emerald-100 bg-white/95 p-5 shadow-sm xl:col-span-2">
+      <section className="grid gap-4 xl:grid-cols-3">
+        <div className="border border-emerald-100 bg-white/95 p-4 shadow-sm xl:col-span-2">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-emerald-700">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
                 Operations Overview
               </p>
 
-              <h3 className="mt-2 text-xl font-bold text-slate-900 sm:text-2xl">
+              <h3 className="mt-1.5 text-lg font-bold text-slate-900 sm:text-xl">
                 Recent Admin Activity
               </h3>
             </div>
 
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-emerald-700">
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-700">
               Live
             </span>
           </div>
 
-          <div className="mt-5 space-y-3">
+          <div className="mt-4 space-y-2.5">
             <ActivityItem
               title={`${totalAssignments} assignment${totalAssignments === 1 ? "" : "s"} published`}
               text="Monitor assignment activity across all tracks and confirm task flow is moving well."
@@ -158,14 +155,14 @@ export default async function AdminDashboardPage() {
             />
           </div>
 
-          <div className="mt-6">
-            <div className="mb-3 flex items-center justify-between">
-              <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-700">
+          <div className="mt-5">
+            <div className="mb-2.5 flex items-center justify-between">
+              <h4 className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-700">
                 Quick Actions
               </h4>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               <QuickActionCard href="/admin/students" label="Students" />
               <QuickActionCard href="/admin/resources" label="Resources" />
               <QuickActionCard href="/admin/assignments" label="Assignments" />
@@ -176,25 +173,25 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-[2rem] border border-emerald-200 bg-gradient-to-br from-emerald-700 via-green-600 to-lime-500 p-5 text-white shadow-[0_20px_60px_-25px_rgba(16,185,129,0.7)]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-50/90">
+        <div className="border border-emerald-200 bg-gradient-to-br from-emerald-700 via-green-600 to-lime-500 p-4 text-white shadow-[0_18px_45px_-24px_rgba(16,185,129,0.7)]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-50/90">
             Admin Notes
           </p>
 
-          <div className="mt-4 space-y-3 text-sm leading-6">
-            <p className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur">
+          <div className="mt-3 space-y-2 text-xs leading-5 sm:text-sm">
+            <p className="border border-white/10 bg-white/10 px-3 py-2.5 backdrop-blur">
               Track teaching activity across all assigned teachers and tracks.
             </p>
 
-            <p className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur">
+            <p className="border border-white/10 bg-white/10 px-3 py-2.5 backdrop-blur">
               Review assignment and submission flow regularly to avoid delays.
             </p>
 
-            <p className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur">
+            <p className="border border-white/10 bg-white/10 px-3 py-2.5 backdrop-blur">
               Keep resources updated so learners always have current materials.
             </p>
 
-            <p className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur">
+            <p className="border border-white/10 bg-white/10 px-3 py-2.5 backdrop-blur">
               Current teacher count: {totalTeachers}
             </p>
           </div>
@@ -214,7 +211,7 @@ function QuickLink({
   return (
     <a
       href={href}
-      className="rounded-2xl border border-white/20 bg-white/15 px-4 py-3 text-center text-sm font-semibold text-white shadow-sm backdrop-blur transition hover:bg-white/25 hover:shadow-md"
+      className="border border-white/20 bg-white/15 px-3 py-2 text-center text-xs font-semibold text-white shadow-sm backdrop-blur transition hover:bg-white/25 hover:shadow-md"
     >
       {label}
     </a>
@@ -231,11 +228,11 @@ function ActivityItem({
   tint: string;
 }) {
   return (
-    <div className={`rounded-[1.35rem] border bg-gradient-to-r ${tint} p-4 transition hover:shadow-sm`}>
-      <p className="text-sm font-semibold text-slate-900 sm:text-[15px]">
+    <div className={`border bg-gradient-to-r ${tint} p-3 transition hover:shadow-sm`}>
+      <p className="text-xs font-semibold text-slate-900 sm:text-sm">
         {title}
       </p>
-      <p className="mt-2 text-xs leading-5 text-slate-600 sm:text-sm">
+      <p className="mt-1.5 text-[11px] leading-5 text-slate-600 sm:text-xs">
         {text}
       </p>
     </div>
@@ -252,7 +249,7 @@ function QuickActionCard({
   return (
     <a
       href={href}
-      className="rounded-[1.15rem] border border-slate-200 bg-gradient-to-br from-slate-50 to-white px-4 py-3 text-center text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-md"
+      className="border border-slate-200 bg-gradient-to-br from-slate-50 to-white px-3 py-2.5 text-center text-xs font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-md"
     >
       {label}
     </a>

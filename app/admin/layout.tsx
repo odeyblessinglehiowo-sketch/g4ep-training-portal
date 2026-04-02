@@ -86,7 +86,7 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-lime-50">
-      <div className="mx-auto flex max-w-[1400px] gap-5 px-4 py-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-[1400px] gap-4 px-3 py-3 sm:px-6 lg:px-8">
         <aside className="hidden w-64 shrink-0 rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm lg:block">
           <div className="rounded-xl bg-gradient-to-br from-emerald-800 via-green-700 to-lime-500 p-4 text-white">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-100">
@@ -115,13 +115,13 @@ export default async function AdminLayout({
         </aside>
 
         <div className="min-w-0 flex-1">
-          <div className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm sm:px-5">
+          <div className="border border-emerald-100 bg-white px-3 py-2 shadow-sm sm:px-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-700">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-700">
                   Admin Workspace
                 </p>
-                <h1 className="text-lg font-semibold text-slate-900">
+                <h1 className="mt-1 text-base font-semibold text-slate-900 sm:text-lg">
                   Command Center
                 </h1>
               </div>
@@ -140,12 +140,12 @@ export default async function AdminLayout({
               </div>
             </div>
 
-            <div className="mt-3 lg:hidden">
+            <div className="mt-2 lg:hidden">
               <MobileDashboardNav items={navItems} />
             </div>
           </div>
 
-          <div className="mt-4 space-y-5">{children}</div>
+          <div className="mt-3 space-y-4">{children}</div>
         </div>
       </div>
 
