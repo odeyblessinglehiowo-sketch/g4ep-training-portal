@@ -8,12 +8,33 @@ import {
 
 export const dynamic = "force-dynamic";
 
+const PER_PAGE_OPTIONS = [3, 10, 25, 50, 100];
+
+function buildAssignmentsUrl(params: {
+  q?: string;
+  track?: string;
+  page?: number;
+  perPage?: number;
+}) {
+  const search = new URLSearchParams();
+
+  if (params.q && params.q.trim()) search.set("q", params.q.trim());
+  if (params.track && params.track !== "ALL") search.set("track", params.track);
+  if (params.page && params.page > 1) search.set("page", String(params.page));
+  if (params.perPage) search.set("perPage", String(params.perPage));
+
+  const query = search.toString();
+  return query ? `/admin/assignments?${query}` : "/admin/assignments";
+}
+
 export default async function AdminAssignmentsPage({
   searchParams,
 }: {
   searchParams: Promise<{
     q?: string;
     track?: string;
+    page?: string;
+    perPage?: string;
   }>;
 }) {
   await requireRole("ADMIN");
@@ -22,40 +43,56 @@ export default async function AdminAssignmentsPage({
   const q = params.q?.trim() ?? "";
   const track = params.track ?? "ALL";
 
-  const assignments = await db.assignment.findMany({
-    where: {
-      AND: [
-        track !== "ALL" ? { track } : {},
-        q
-          ? {
-              OR: [
-                {
-                  title: {
-                    contains: q,
-                    mode: "insensitive",
-                  },
+  const rawPage = Number(params.page ?? "1");
+  const rawPerPage = Number(params.perPage ?? "3");
+
+  const perPage = PER_PAGE_OPTIONS.includes(rawPerPage) ? rawPerPage : 3;
+  const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
+
+  const whereClause = {
+    AND: [
+      track !== "ALL" ? { track } : {},
+      q
+        ? {
+            OR: [
+              {
+                title: {
+                  contains: q,
+                  mode: "insensitive" as const,
                 },
-                {
-                  question: {
-                    contains: q,
-                    mode: "insensitive",
-                  },
+              },
+              {
+                question: {
+                  contains: q,
+                  mode: "insensitive" as const,
                 },
-                {
-                  teacher: {
-                    user: {
-                      name: {
-                        contains: q,
-                        mode: "insensitive",
-                      },
+              },
+              {
+                teacher: {
+                  user: {
+                    name: {
+                      contains: q,
+                      mode: "insensitive" as const,
                     },
                   },
                 },
-              ],
-            }
-          : {},
-      ],
-    },
+              },
+            ],
+          }
+        : {},
+    ],
+  };
+
+  const totalFilteredAssignments = await db.assignment.count({
+    where: whereClause,
+  });
+
+  const totalPages = Math.max(1, Math.ceil(totalFilteredAssignments / perPage));
+  const currentPage = Math.min(page, totalPages);
+  const skip = (currentPage - 1) * perPage;
+
+  const assignments = await db.assignment.findMany({
+    where: whereClause,
     include: {
       teacher: {
         include: {
@@ -67,6 +104,8 @@ export default async function AdminAssignmentsPage({
     orderBy: {
       createdAt: "desc",
     },
+    skip,
+    take: perPage,
   });
 
   const trackRows = await db.student.findMany({
@@ -103,109 +142,163 @@ export default async function AdminAssignmentsPage({
   });
 
   const totalAssignments = await db.assignment.count();
-  const filteredAssignments = enrichedAssignments.length;
-  const totalViewedRecords = enrichedAssignments.reduce(
-    (sum, assignment) => sum + assignment.seenCount,
-    0
-  );
-  const totalUnreadRecords = enrichedAssignments.reduce(
-    (sum, assignment) => sum + assignment.unreadCount,
+  const filteredAssignments = totalFilteredAssignments;
+
+  const allFilteredAssignments = await db.assignment.findMany({
+    where: whereClause,
+    include: {
+      views: true,
+    },
+  });
+
+  const totalViewedRecords = allFilteredAssignments.reduce(
+    (sum, assignment) =>
+      sum + assignment.views.filter((view) => view.seenAt !== null).length,
     0
   );
 
+  const totalUnreadRecords = allFilteredAssignments.reduce((sum, assignment) => {
+    const totalStudentsInTrack = studentCountMap.get(assignment.track) ?? 0;
+    const seenCount = assignment.views.filter((view) => view.seenAt !== null).length;
+    return sum + Math.max(totalStudentsInTrack - seenCount, 0);
+  }, 0);
+
+  const publishedAssignments = allFilteredAssignments.filter(
+    (assignment) => assignment.isPublished
+  ).length;
+
+  const unpublishedAssignments = allFilteredAssignments.filter(
+    (assignment) => !assignment.isPublished
+  ).length;
+
+  const hasPreviousPage = currentPage > 1;
+  const hasNextPage = currentPage < totalPages;
+
   return (
-    <main className="space-y-6">
-      <section className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-emerald-900 via-green-700 to-lime-500 p-6 text-white shadow-lg shadow-emerald-200/50 sm:p-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50/90">
+    <main className="space-y-4">
+      <section className="overflow-hidden border border-emerald-200 bg-gradient-to-r from-emerald-950 via-emerald-700 to-lime-500 px-4 py-4 text-white shadow-[0_18px_45px_-22px_rgba(16,185,129,0.55)] sm:px-5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-100/90">
           Assignments
         </p>
 
-        <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
+        <h1 className="mt-1.5 text-xl font-bold sm:text-2xl">
           Monitor Assignments
         </h1>
 
-        <p className="mt-4 max-w-3xl text-sm leading-7 text-emerald-50/90 sm:text-base">
-          Monitor assignment activity across all tracks, review status, and see
-          which students have read each assignment.
+        <p className="mt-2 text-xs text-emerald-50/90 sm:text-sm">
+          Monitor assignment activity and reading records from one central workspace.
         </p>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total Assignments" value={totalAssignments} />
+      <section className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
+        <StatCard
+          label="Total Assignments"
+          value={totalAssignments}
+          note="All assignments"
+          soft="from-emerald-50 to-white"
+          border="border-emerald-100"
+          line="from-emerald-600 to-green-500"
+          valueColor="text-emerald-800"
+        />
         <StatCard
           label="Filtered Result"
           value={filteredAssignments}
-          tone="bg-emerald-50"
-          valueClass="text-emerald-700"
+          note="Current filtered view"
+          soft="from-lime-50 to-white"
+          border="border-lime-100"
+          line="from-lime-500 to-emerald-500"
+          valueColor="text-lime-800"
         />
         <StatCard
           label="Viewed Records"
           value={totalViewedRecords}
-          tone="bg-lime-50"
-          valueClass="text-lime-700"
+          note="Students who opened"
+          soft="from-green-50 to-white"
+          border="border-green-100"
+          line="from-green-600 to-emerald-600"
+          valueColor="text-green-800"
         />
         <StatCard
           label="Unread Records"
           value={totalUnreadRecords}
-          tone="bg-red-50"
-          valueClass="text-red-700"
+          note="Students yet to open"
+          soft="from-red-50 to-white"
+          border="border-red-100"
+          line="from-red-500 to-rose-500"
+          valueColor="text-red-700"
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <section className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900">Assignment Overview</h2>
-          <p className="mt-1 text-sm text-slate-600">
+      <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <section className="border border-emerald-100 bg-white p-4 shadow-sm">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              Assignment Overview
+            </p>
+            <h2 className="mt-1 text-lg font-bold text-slate-900">
+              Activity Summary
+            </h2>
+          </div>
+
+          <p className="mt-1.5 text-xs text-slate-600 sm:text-sm">
             Admin-level monitoring across teachers and tracks.
           </p>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="mt-4 grid grid-cols-2 gap-2.5">
             <MiniCard
-              label="Published Assignments"
-              value={enrichedAssignments.filter((a) => a.isPublished).length}
-              soft="bg-emerald-50 ring-emerald-100"
+              label="Published"
+              value={publishedAssignments}
+              soft="from-emerald-50 to-white border-emerald-100"
               valueClass="text-emerald-700"
             />
             <MiniCard
-              label="Unpublished Assignments"
-              value={enrichedAssignments.filter((a) => !a.isPublished).length}
-              soft="bg-slate-50 ring-slate-200"
+              label="Unpublished"
+              value={unpublishedAssignments}
+              soft="from-slate-50 to-white border-slate-200"
               valueClass="text-slate-800"
             />
             <MiniCard
-              label="Seen Assignment Records"
+              label="Seen Records"
               value={totalViewedRecords}
-              soft="bg-lime-50 ring-lime-100"
+              soft="from-lime-50 to-white border-lime-100"
               valueClass="text-lime-700"
             />
             <MiniCard
-              label="Unread Assignment Records"
+              label="Unread Records"
               value={totalUnreadRecords}
-              soft="bg-red-50 ring-red-100"
+              soft="from-red-50 to-white border-red-100"
               valueClass="text-red-700"
             />
           </div>
         </section>
 
-        <section className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900">Search & Filters</h2>
-          <p className="mt-1 text-sm text-slate-600">
+        <section className="border border-emerald-100 bg-white p-4 shadow-sm">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              Search & Filters
+            </p>
+            <h2 className="mt-1 text-lg font-bold text-slate-900">
+              Filter Assignments
+            </h2>
+          </div>
+
+          <p className="mt-1.5 text-xs text-slate-600 sm:text-sm">
             Search by title, question, or teacher and filter by track.
           </p>
 
-          <form className="mt-6 grid gap-4">
+          <form className="mt-4 grid gap-3">
             <input
               name="q"
               type="text"
               defaultValue={q}
               placeholder="Search title, question, or teacher"
-              className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-green-600"
+              className="border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-green-600"
             />
 
             <select
               name="track"
               defaultValue={track}
-              className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-green-600"
+              className="border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-green-600"
             >
               <option value="ALL">All Tracks</option>
               {trackOptions.map((trackOption) => (
@@ -215,17 +308,19 @@ export default async function AdminAssignmentsPage({
               ))}
             </select>
 
-            <div className="flex gap-3">
+            <input type="hidden" name="perPage" value={perPage} />
+
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="submit"
-                className="flex-1 rounded-xl bg-green-700 px-5 py-3 font-semibold text-white hover:bg-green-800"
+                className="bg-green-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800"
               >
                 Apply
               </button>
 
               <a
                 href="/admin/assignments"
-                className="flex-1 rounded-xl bg-slate-200 px-5 py-3 text-center font-semibold text-slate-800 hover:bg-slate-300"
+                className="bg-slate-200 px-4 py-2.5 text-center text-sm font-semibold text-slate-800 transition hover:bg-slate-300"
               >
                 Reset
               </a>
@@ -234,22 +329,22 @@ export default async function AdminAssignmentsPage({
         </section>
       </section>
 
-      <section className="grid gap-6">
+      <section className="space-y-2.5">
         {enrichedAssignments.length > 0 ? (
           enrichedAssignments.map((assignment) => (
             <article
               key={assignment.id}
-              className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm"
+              className="border border-emerald-100 bg-white p-3 shadow-sm"
             >
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="min-w-0 flex-1">
+              <div className="flex flex-col gap-3">
+                <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-xl font-bold text-slate-900">
+                    <h3 className="text-sm font-bold text-slate-900 sm:text-base">
                       {assignment.title}
                     </h3>
 
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${
                         assignment.isPublished
                           ? "bg-emerald-100 text-emerald-700"
                           : "bg-slate-200 text-slate-700"
@@ -257,20 +352,23 @@ export default async function AdminAssignmentsPage({
                     >
                       {assignment.isPublished ? "Published" : "Unpublished"}
                     </span>
-
-                    {assignment.unreadCount > 0 && assignment.isPublished && (
-                      <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
-                        {assignment.unreadCount} unread
-                      </span>
-                    )}
                   </div>
 
-                  <div className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
-                    <p>Teacher: {assignment.teacher.user.name}</p>
-                    <p>Track: {assignment.track}</p>
-                    <p>Created: {formatDateTime(assignment.createdAt)}</p>
+                  <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px] text-slate-600 sm:text-xs">
                     <p>
-                      Due Date:{" "}
+                      <span className="font-semibold text-slate-700">Teacher:</span>{" "}
+                      {assignment.teacher.user.name}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-slate-700">Track:</span>{" "}
+                      {assignment.track}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-slate-700">Created:</span>{" "}
+                      {formatDateTime(assignment.createdAt)}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-slate-700">Due:</span>{" "}
                       {assignment.dueDate
                         ? formatDateTime(assignment.dueDate)
                         : "No deadline"}
@@ -278,20 +376,36 @@ export default async function AdminAssignmentsPage({
                   </div>
 
                   {assignment.question && (
-                    <div className="mt-5 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-                      <p className="text-sm font-medium text-slate-500">
-                        Assignment Question
+                    <div className="mt-3 border border-slate-200 bg-slate-50 p-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        Assignment Content
                       </p>
-                      <p className="mt-2 whitespace-pre-line text-sm leading-7 text-slate-700">
+                      <p className="mt-1.5 whitespace-pre-line text-[11px] leading-5 text-slate-700 sm:text-xs">
                         {assignment.question}
                       </p>
                     </div>
                   )}
 
-                  <div className="mt-5 flex flex-wrap gap-3">
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <Link
+                      href={`/admin/assignments/${assignment.id}#seen-students`}
+                      className="border border-emerald-100 bg-emerald-50 px-3 py-2 text-center text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                    >
+                      Seen: {assignment.seenCount}/{assignment.totalStudentsInTrack}
+                    </Link>
+
+                    <Link
+                      href={`/admin/assignments/${assignment.id}#unread-students`}
+                      className="border border-red-100 bg-red-50 px-3 py-2 text-center text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                    >
+                      Unread: {assignment.unreadCount}
+                    </Link>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
                     <Link
                       href={`/admin/assignments/${assignment.id}`}
-                      className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                      className="bg-emerald-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-800"
                     >
                       View Details
                     </Link>
@@ -304,7 +418,7 @@ export default async function AdminAssignmentsPage({
                       />
                       <button
                         type="submit"
-                        className="rounded-xl bg-lime-100 px-4 py-2 text-sm font-semibold text-lime-800 transition hover:bg-lime-200"
+                        className="bg-lime-100 px-3 py-2 text-xs font-semibold text-lime-800 transition hover:bg-lime-200"
                       >
                         {assignment.isPublished ? "Unpublish" : "Publish"}
                       </button>
@@ -318,38 +432,106 @@ export default async function AdminAssignmentsPage({
                       />
                       <button
                         type="submit"
-                        className="rounded-xl bg-red-100 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-200"
+                        className="bg-red-100 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-200"
                       >
                         Delete
                       </button>
                     </form>
                   </div>
                 </div>
-
-                <div className="grid shrink-0 gap-2 text-sm lg:min-w-[220px]">
-                  <Link
-                    href={`/admin/assignments/${assignment.id}#seen-students`}
-                    className="rounded-2xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
-                  >
-                    Seen: {assignment.seenCount}/{assignment.totalStudentsInTrack}
-                  </Link>
-                  <Link
-                    href={`/admin/assignments/${assignment.id}#unread-students`}
-                    className="rounded-2xl bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
-                  >
-                    Unread: {assignment.unreadCount}
-                  </Link>
-                </div>
               </div>
             </article>
           ))
         ) : (
-          <div className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
+          <div className="border border-emerald-100 bg-white p-4 shadow-sm">
             <p className="text-sm text-slate-600">
               No assignments matched your current filters.
             </p>
           </div>
         )}
+      </section>
+
+      <section className="border border-emerald-100 bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            {hasPreviousPage ? (
+              <a
+                href={buildAssignmentsUrl({
+                  q,
+                  track,
+                  page: currentPage - 1,
+                  perPage,
+                })}
+                className="border border-emerald-200 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
+              >
+                ← Prev
+              </a>
+            ) : (
+              <span className="border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-400">
+                ← Prev
+              </span>
+            )}
+
+            {hasNextPage ? (
+              <a
+                href={buildAssignmentsUrl({
+                  q,
+                  track,
+                  page: currentPage + 1,
+                  perPage,
+                })}
+                className="border border-emerald-200 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
+              >
+                Next →
+              </a>
+            ) : (
+              <span className="border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-400">
+                Next →
+              </span>
+            )}
+
+            <p className="text-sm font-semibold text-slate-900">
+              Page: <span className="ml-1">{currentPage}</span>
+            </p>
+          </div>
+
+          <form className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <input type="hidden" name="q" value={q} />
+            <input type="hidden" name="track" value={track} />
+            <input type="hidden" name="page" value="1" />
+
+            <label
+              htmlFor="perPage"
+              className="text-sm font-semibold text-slate-900"
+            >
+              Per page:
+            </label>
+
+            <select
+              id="perPage"
+              name="perPage"
+              defaultValue={String(perPage)}
+              className="border border-emerald-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 outline-none transition focus:border-emerald-500"
+            >
+              {PER_PAGE_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="submit"
+              className="bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800"
+            >
+              Apply
+            </button>
+          </form>
+        </div>
+
+        <p className="mt-3 text-sm font-semibold text-slate-800">
+          Total results: {filteredAssignments} • Page {currentPage} of {totalPages}
+        </p>
       </section>
     </main>
   );
@@ -358,18 +540,34 @@ export default async function AdminAssignmentsPage({
 function StatCard({
   label,
   value,
-  tone = "bg-white",
-  valueClass = "text-slate-900",
+  note,
+  soft,
+  border,
+  line,
+  valueColor,
 }: {
   label: string;
   value: string | number;
-  tone?: string;
-  valueClass?: string;
+  note: string;
+  soft: string;
+  border: string;
+  line: string;
+  valueColor: string;
 }) {
   return (
-    <div className={`rounded-[1.5rem] p-5 shadow-sm ring-1 ring-slate-200 ${tone}`}>
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className={`mt-2 text-3xl font-bold ${valueClass}`}>{value}</p>
+    <div
+      className={`border bg-gradient-to-br ${soft} ${border} p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md`}
+    >
+      <div className={`h-1.5 w-16 bg-gradient-to-r ${line}`} />
+      <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-[11px]">
+        {label}
+      </p>
+      <h2 className={`mt-1.5 text-lg font-bold sm:text-xl ${valueColor}`}>
+        {value}
+      </h2>
+      <p className="mt-1.5 text-[11px] leading-5 text-slate-600 sm:text-xs">
+        {note}
+      </p>
     </div>
   );
 }
@@ -377,7 +575,7 @@ function StatCard({
 function MiniCard({
   label,
   value,
-  soft = "bg-slate-50 ring-slate-200",
+  soft = "from-slate-50 to-white border-slate-200",
   valueClass = "text-slate-900",
 }: {
   label: string;
@@ -386,9 +584,13 @@ function MiniCard({
   valueClass?: string;
 }) {
   return (
-    <div className={`rounded-2xl p-4 ring-1 ${soft}`}>
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className={`mt-2 text-xl font-bold ${valueClass}`}>{value}</p>
+    <div className={`border bg-gradient-to-br ${soft} p-2.5`}>
+      <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+        {label}
+      </p>
+      <p className={`mt-1 text-sm font-bold sm:text-base ${valueClass}`}>
+        {value}
+      </p>
     </div>
   );
 }

@@ -50,7 +50,7 @@ export default async function AdminResourcesPage() {
       </section>
 
       {/* FORM (TIGHT + CLEAN) */}
-      <section className="border border-emerald-100 bg-white p-4 shadow-sm">
+      <section className="border border-emerald-100 bg-white p-3 shadow-sm">
         <form
           action={createResource}
           encType="multipart/form-data"
