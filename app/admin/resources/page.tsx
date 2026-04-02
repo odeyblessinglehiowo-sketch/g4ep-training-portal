@@ -32,156 +32,128 @@ export default async function AdminResourcesPage() {
   });
 
   return (
-    <main className="space-y-6">
-      <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
+    <main className="space-y-4">
+
+      {/* HERO (NOW GREEN) */}
+      <section className="overflow-hidden border border-emerald-200 bg-gradient-to-r from-emerald-950 via-emerald-700 to-lime-500 px-4 py-4 text-white shadow-[0_18px_45px_-22px_rgba(16,185,129,0.55)] sm:px-5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-100/90">
           Resources
         </p>
 
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">
+        <h1 className="mt-1.5 text-xl font-bold sm:text-2xl">
           Training Materials
         </h1>
 
-        <p className="mt-2 text-sm text-slate-600">
-          Upload and manage learning resources for each training track.
+        <p className="mt-2 text-xs text-emerald-50/90 sm:text-sm">
+          Upload and manage learning resources from one central workspace.
         </p>
       </section>
 
-      <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      {/* FORM (TIGHT + CLEAN) */}
+      <section className="border border-emerald-100 bg-white p-4 shadow-sm">
         <form
           action={createResource}
           encType="multipart/form-data"
-          className="grid gap-4 md:grid-cols-2"
+          className="grid gap-3 md:grid-cols-2"
         >
           <input
             name="title"
             type="text"
             placeholder="Resource Title"
-            className="rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-green-700"
+            className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-green-600"
           />
 
           <input
             name="track"
             type="text"
             placeholder="Track (Web Design, AI, Photography...)"
-            className="rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-green-700"
+            className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-green-600"
           />
 
           <input
             name="linkUrl"
             type="text"
-            placeholder="Optional Link"
-            className="rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-green-700 md:col-span-2"
+            placeholder="Link (optional)"
+            className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-green-600 md:col-span-2"
           />
 
           <input
             name="file"
             type="file"
-            className="rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-green-700 md:col-span-2"
+            className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-green-600 md:col-span-2"
           />
 
           <button
             type="submit"
-            className="md:col-span-2 rounded-lg bg-green-700 py-2 font-semibold text-white hover:bg-green-800"
+            className="md:col-span-2 bg-green-700 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
           >
             Upload Resource
           </button>
         </form>
       </section>
 
-      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {/* RESOURCE LIST */}
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {resources.length > 0 ? (
           resources.map((resource) => (
             <div
               key={resource.id}
-              className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+              className="border border-emerald-100 bg-white p-4 shadow-sm transition hover:shadow-md"
             >
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">
+                  <h3 className="text-sm font-bold text-slate-900">
                     {resource.title}
                   </h3>
 
-                  <p className="mt-2 text-sm text-slate-600">
+                  <p className="mt-1 text-xs text-slate-600">
                     Track: {resource.track}
                   </p>
 
-                  <p className="mt-1 text-sm text-slate-500">
-                    Uploaded: {new Date(resource.createdAt).toLocaleDateString()}
+                  <p className="text-[11px] text-slate-500">
+                    {new Date(resource.createdAt).toLocaleDateString()}
                   </p>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {resource.fileUrl && isImageFile(resource.fileUrl) && (
-                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    <span className="bg-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-700">
                       Image
                     </span>
                   )}
 
                   {resource.fileUrl && isPdfFile(resource.fileUrl) && (
-                    <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">
+                    <span className="bg-sky-100 px-2 py-1 text-[10px] font-semibold text-sky-700">
                       PDF
                     </span>
                   )}
 
-                  {resource.fileUrl &&
-                    !isPdfFile(resource.fileUrl) &&
-                    !isImageFile(resource.fileUrl) && (
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                        File
-                      </span>
-                    )}
-
                   {resource.linkUrl && (
-                    <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
+                    <span className="bg-indigo-100 px-2 py-1 text-[10px] font-semibold text-indigo-700">
                       Link
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-3">
-                {resource.fileUrl && isImageFile(resource.fileUrl) && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {resource.fileUrl && (
                   <a
                     href={resource.fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800"
+                    className="bg-green-700 px-3 py-2 text-xs font-semibold text-white hover:bg-green-800"
                   >
-                    View Image
+                    View File
                   </a>
                 )}
-
-                {resource.fileUrl && isPdfFile(resource.fileUrl) && (
-                  <a
-                    href={resource.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800"
-                  >
-                    View PDF
-                  </a>
-                )}
-
-                {resource.fileUrl &&
-                  !isPdfFile(resource.fileUrl) &&
-                  !isImageFile(resource.fileUrl) && (
-                    <a
-                      href={resource.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800"
-                    >
-                      Open File
-                    </a>
-                  )}
 
                 {resource.linkUrl && (
                   <a
                     href={resource.linkUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+                    className="bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
                   >
                     Open Link
                   </a>
@@ -190,7 +162,7 @@ export default async function AdminResourcesPage() {
             </div>
           ))
         ) : (
-          <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:col-span-2 xl:col-span-3">
+          <div className="border border-emerald-100 bg-white p-4 shadow-sm md:col-span-2 xl:col-span-3">
             <p className="text-sm text-slate-600">
               No resources uploaded yet.
             </p>
