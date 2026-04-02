@@ -57,7 +57,7 @@ export default async function AdminLayout({
   }).length;
 
   const navItems = [
-    { name: "Dashboard", href: "/admin/dashboard", short: "Home" },
+    { name: "Dashboard", href: "/admin/dashboard", short: "Dashboard" },
     { name: "Students", href: "/admin/students", short: "Students" },
     { name: "Teachers", href: "/admin/teachers", short: "Teachers" },
     { name: "Admins", href: "/admin/admins", short: "Admins" },
@@ -66,15 +66,15 @@ export default async function AdminLayout({
       name: "Assignments",
       href: "/admin/assignments",
       short: "Assignments",
-      badge: unreadAssignmentBadgeCount,
+
     },
     {
       name: "Submissions",
       href: "/admin/submissions",
-      short: "Projects",
+      short: "Submissions",
       badge: pendingSubmissionCount,
     },
-    { name: "Certificates", href: "/admin/certificates", short: "Certs" },
+    { name: "Certificates", href: "/admin/certificates", short: "Certificates" },
     { name: "Attendance", href: "/admin/attendance", short: "Attendance" },
     {
       name: "Leaderboard",
