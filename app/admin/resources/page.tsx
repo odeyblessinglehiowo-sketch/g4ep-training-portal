@@ -93,7 +93,7 @@ export default async function AdminResourcesPage() {
       </section>
 
       {/* RESOURCE LIST */}
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <section className="grid grid-cols-2 gap-2.5 md:grid-cols-2 xl:grid-cols-3">
         {resources.length > 0 ? (
           resources.map((resource) => (
             <div
