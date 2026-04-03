@@ -79,7 +79,7 @@ export default async function AdminLayout({
     {
       name: "Leaderboard",
       href: "/admin/attendance/leaderboard",
-      short: "Ranks",
+      short: "Leaderboard",
     },
     { name: "Users", href: "/admin/users", short: "Users" },
   ];
