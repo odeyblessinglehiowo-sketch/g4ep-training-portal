@@ -28,6 +28,8 @@ function buildUsersRedirect(params: {
   role?: string;
   track?: string;
   status?: string;
+  page?: string;
+  perPage?: string;
 }) {
   const searchParams = new URLSearchParams();
 
@@ -41,6 +43,8 @@ function buildUsersRedirect(params: {
   if (params.role) searchParams.set("role", params.role);
   if (params.track) searchParams.set("track", params.track);
   if (params.status) searchParams.set("status", params.status);
+  if (params.page && params.page !== "1") searchParams.set("page", params.page);
+  if (params.perPage) searchParams.set("perPage", params.perPage);
 
   return `/admin/users?${searchParams.toString()}`;
 }
@@ -53,6 +57,8 @@ export async function toggleUserStatus(formData: FormData) {
   const role = formData.get("role")?.toString() ?? "ALL";
   const track = formData.get("track")?.toString() ?? "ALL";
   const status = formData.get("status")?.toString() ?? "ALL";
+  const page = formData.get("page")?.toString() ?? "1";
+  const perPage = formData.get("perPage")?.toString() ?? "10";
 
   if (!userId) {
     redirect(
@@ -62,6 +68,8 @@ export async function toggleUserStatus(formData: FormData) {
         role,
         track,
         status,
+        page,
+        perPage,
       })
     );
   }
@@ -78,6 +86,8 @@ export async function toggleUserStatus(formData: FormData) {
         role,
         track,
         status,
+        page,
+        perPage,
       })
     );
   }
@@ -92,6 +102,8 @@ export async function toggleUserStatus(formData: FormData) {
         role,
         track,
         status,
+        page,
+        perPage,
       })
     );
   }
@@ -112,6 +124,8 @@ export async function toggleUserStatus(formData: FormData) {
           role,
           track,
           status,
+          page,
+          perPage,
         })
       );
     }
@@ -133,6 +147,8 @@ export async function toggleUserStatus(formData: FormData) {
       role,
       track,
       status,
+      page,
+      perPage,
     })
   );
 }
@@ -145,6 +161,8 @@ export async function resetUserPassword(formData: FormData) {
   const role = formData.get("role")?.toString() ?? "ALL";
   const track = formData.get("track")?.toString() ?? "ALL";
   const status = formData.get("status")?.toString() ?? "ALL";
+  const page = formData.get("page")?.toString() ?? "1";
+  const perPage = formData.get("perPage")?.toString() ?? "10";
 
   if (!userId) {
     redirect(
@@ -154,6 +172,8 @@ export async function resetUserPassword(formData: FormData) {
         role,
         track,
         status,
+        page,
+        perPage,
       })
     );
   }
@@ -170,6 +190,8 @@ export async function resetUserPassword(formData: FormData) {
         role,
         track,
         status,
+        page,
+        perPage,
       })
     );
   }
@@ -183,6 +205,8 @@ export async function resetUserPassword(formData: FormData) {
         role,
         track,
         status,
+        page,
+        perPage,
       })
     );
   }
@@ -214,6 +238,8 @@ export async function resetUserPassword(formData: FormData) {
         role,
         track,
         status,
+        page,
+        perPage,
       })
     );
   }
@@ -227,6 +253,163 @@ export async function resetUserPassword(formData: FormData) {
       role,
       track,
       status,
+      page,
+      perPage,
+    })
+  );
+}
+
+export async function deleteUser(formData: FormData) {
+  const currentAdmin = await requireRole("ADMIN");
+
+  const userId = formData.get("userId")?.toString();
+  const q = formData.get("q")?.toString() ?? "";
+  const role = formData.get("role")?.toString() ?? "ALL";
+  const track = formData.get("track")?.toString() ?? "ALL";
+  const status = formData.get("status")?.toString() ?? "ALL";
+  const page = formData.get("page")?.toString() ?? "1";
+  const perPage = formData.get("perPage")?.toString() ?? "10";
+
+  if (!userId) {
+    redirect(
+      buildUsersRedirect({
+        error: "Missing user ID.",
+        q,
+        role,
+        track,
+        status,
+        page,
+        perPage,
+      })
+    );
+  }
+
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    include: {
+      student: true,
+      teacher: true,
+    },
+  });
+
+  if (!user) {
+    redirect(
+      buildUsersRedirect({
+        error: "User not found.",
+        q,
+        role,
+        track,
+        status,
+        page,
+        perPage,
+      })
+    );
+  }
+
+  if (user.id === currentAdmin.userId) {
+    redirect(
+      buildUsersRedirect({
+        error: "You cannot delete the account you are currently using.",
+        q,
+        role,
+        track,
+        status,
+        page,
+        perPage,
+      })
+    );
+  }
+
+  if (user.role === "ADMIN" && user.isActive) {
+    const activeAdmins = await db.user.count({
+      where: {
+        role: "ADMIN",
+        isActive: true,
+      },
+    });
+
+    if (activeAdmins <= 1) {
+      redirect(
+        buildUsersRedirect({
+          error: "You cannot delete the last active admin.",
+          q,
+          role,
+          track,
+          status,
+          page,
+          perPage,
+        })
+      );
+    }
+  }
+
+  try {
+    if (user.student) {
+      await db.attendanceRecord.deleteMany({
+        where: { studentId: user.student.id },
+      });
+
+      await db.assignmentView.deleteMany({
+        where: { studentId: user.student.id },
+      });
+
+      await db.submission.deleteMany({
+        where: { studentId: user.student.id },
+      });
+
+      await db.certificate.deleteMany({
+        where: { studentId: user.student.id },
+      });
+
+      await db.student.delete({
+        where: { id: user.student.id },
+      });
+    }
+
+    if (user.teacher) {
+      await db.assignment.deleteMany({
+        where: { teacherId: user.teacher.id },
+      });
+
+      await db.attendanceSession.deleteMany({
+        where: { teacherId: user.teacher.id },
+      });
+
+      await db.teacher.delete({
+        where: { id: user.teacher.id },
+      });
+    }
+
+    await db.user.delete({
+      where: { id: user.id },
+    });
+  } catch (error) {
+    console.error("Delete user failed:", error);
+
+    redirect(
+      buildUsersRedirect({
+        error:
+          "This user could not be deleted. There may still be related records linked to the account.",
+        q,
+        role,
+        track,
+        status,
+        page,
+        perPage,
+      })
+    );
+  }
+
+  redirect(
+    buildUsersRedirect({
+      success: "deleted",
+      name: user.name,
+      q,
+      role,
+      track,
+      status,
+      page,
+      perPage,
     })
   );
 }
