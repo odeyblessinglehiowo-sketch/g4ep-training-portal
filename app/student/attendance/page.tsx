@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { syncExpiredAttendanceSessions } from "@/lib/attendance";
+import { headers } from "next/headers";
 
 export default async function StudentAttendancePage() {
   const currentUser = await requireRole("STUDENT");

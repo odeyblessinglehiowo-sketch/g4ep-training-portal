@@ -4,6 +4,8 @@ import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { syncExpiredAttendanceSessions } from "@/lib/attendance";
 import { createAttendanceSession } from "./actions";
+import { headers } from "next/headers";
+
 
 export const dynamic = "force-dynamic";
 
@@ -155,10 +157,8 @@ export default async function TeacherAttendancePage({
     },
   });
 
-  const appUrl =
-    process.env.APP_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    "http://localhost:3000";
+  
+const appUrl = "https://portal.geeeep.com.ng";
 
   const success = params.success;
   const error = params.error;
