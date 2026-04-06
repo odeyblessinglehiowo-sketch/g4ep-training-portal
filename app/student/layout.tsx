@@ -63,7 +63,7 @@ export default async function StudentLayout({
     {
       name: "Submissions",
       href: "/student/submissions",
-      short: "Projects",
+      short: "Submissions",
       badge: unreadReviewedCount,
     },
     { name: "Attendance", href: "/student/attendance", short: "Attendance" },
@@ -72,59 +72,70 @@ export default async function StudentLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#dcfce7,_#f8fafc_40%,_#ecfdf5_70%,_#d1fae5)]">
-      <div className="mx-auto flex max-w-7xl gap-6 px-4 py-5 sm:px-6 lg:px-8">
-        <aside className="hidden w-72 shrink-0 rounded-[2rem] border border-emerald-100 bg-white/90 p-6 shadow-lg shadow-emerald-100/40 backdrop-blur lg:block">
-          <div className="rounded-[1.75rem] bg-gradient-to-br from-emerald-700 via-green-600 to-lime-500 p-5 text-white shadow-md">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-50/90">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-lime-50">
+      <div className="mx-auto flex max-w-[1400px] gap-4 px-3 py-3 sm:px-6 lg:px-8">
+        <aside className="hidden w-64 shrink-0 border border-emerald-100 bg-white p-5 shadow-sm lg:block">
+          <div className="bg-gradient-to-br from-emerald-800 via-green-700 to-lime-500 p-4 text-white">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-100">
               Student Portal
             </p>
 
-            <h2 className="mt-3 text-2xl font-bold">G4EP RISE</h2>
+            <h2 className="mt-2 text-xl font-bold">G4EP RISE</h2>
 
-            <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-              Access your learning tools, assignments, attendance, projects, and
-              certificate journey in one place.
+            <p className="mt-2 text-xs leading-5 text-emerald-100">
+              Access your learning tools, assignments, attendance, submissions, and certificate journey in one place.
             </p>
           </div>
 
-          <PortalSideNav items={navItems} />
+          <div className="mt-6">
+            <PortalSideNav items={navItems} />
+          </div>
 
-          <div className="mt-8 rounded-[1.75rem] border border-emerald-100 bg-gradient-to-r from-emerald-50 to-lime-50 p-4">
-            <p className="text-sm font-semibold text-emerald-800">Need help?</p>
-            <p className="mt-2 text-sm leading-6 text-slate-700">
-              Reach out to your coordinator if you need help with materials,
-              assignments, submissions, attendance, or certificate updates.
+          <div className="mt-6 border border-emerald-100 bg-emerald-50 p-3">
+            <p className="text-xs font-semibold text-emerald-700">
+              Need help?
+            </p>
+            <p className="mt-1 text-xs text-slate-600">
+              Reach out to your coordinator if you need help with materials, assignments, submissions, attendance, or certificate updates.
             </p>
           </div>
         </aside>
 
         <div className="min-w-0 flex-1">
-          <div className="rounded-[2rem] border border-emerald-100 bg-white/90 p-4 shadow-sm backdrop-blur sm:p-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="border border-emerald-100 bg-white px-3 py-2 shadow-sm sm:px-4">
+            <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-700">
                   Student Workspace
                 </p>
-                <h1 className="mt-2 text-2xl font-bold text-slate-900">
+                <h1 className="mt-1 text-base font-semibold text-slate-900 sm:text-lg">
                   Learning Dashboard
                 </h1>
               </div>
 
-              <div className="flex w-full items-center justify-between gap-3 lg:w-auto lg:justify-end">
-                <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+              <div className="hidden items-center gap-2 lg:flex">
+                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                   Student
                 </span>
                 <LogoutButton />
               </div>
+
+              <div className="lg:hidden">
+                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                  Student
+                </span>
+              </div>
             </div>
 
-            <MobileDashboardNav items={navItems} />
+            <div className="mt-2 lg:hidden">
+              <MobileDashboardNav items={navItems} />
+            </div>
           </div>
 
-          <div className="mt-5 space-y-6">{children}</div>
+          <div className="mt-3 space-y-4">{children}</div>
         </div>
       </div>
+
       <PortalFooter />
     </div>
   );
