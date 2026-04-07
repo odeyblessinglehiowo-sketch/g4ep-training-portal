@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
+const PAGE_SIZE = 8;
+
 function isPdfFile(url?: string | null) {
   if (!url) return false;
   return url.toLowerCase().includes(".pdf");
@@ -26,7 +28,14 @@ function isImageFile(url?: string | null) {
   );
 }
 
-export default async function StudentResourcesPage() {
+export default async function StudentResourcesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const page = Number(params.page ?? "1");
+
   const currentUser = await requireRole("STUDENT");
 
   const studentUser = await db.user.findUnique({
@@ -44,6 +53,15 @@ export default async function StudentResourcesPage() {
 
   const student = studentUser.student;
 
+  const totalResources = await db.resource.count({
+    where: {
+      track: student.track,
+    },
+  });
+
+  const totalPages = Math.max(1, Math.ceil(totalResources / PAGE_SIZE));
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
+
   const resources = await db.resource.findMany({
     where: {
       track: student.track,
@@ -51,11 +69,13 @@ export default async function StudentResourcesPage() {
     orderBy: {
       createdAt: "desc",
     },
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
   });
 
   return (
-    <main className="space-y-6">
-      <section className="rounded-[2rem] bg-gradient-to-r from-emerald-800 via-green-700 to-lime-500 p-6 text-white shadow-lg shadow-emerald-200/50 sm:p-8">
+    <main className="space-y-4">
+      <section className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-emerald-800 via-green-700 to-lime-500 p-6 text-white shadow-lg shadow-emerald-200/50 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50/90">
           Training Materials
         </p>
@@ -70,7 +90,7 @@ export default async function StudentResourcesPage() {
         </p>
       </section>
 
-      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <section className="grid grid-cols-2 gap-6 xl:grid-cols-4">
         {resources.length > 0 ? (
           resources.map((resource) => (
             <article
@@ -113,7 +133,7 @@ export default async function StudentResourcesPage() {
                       </span>
                     )}
 
-                  {resource.fileUrl && (
+                  {resource.linkUrl && (
                     <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
                       Link
                     </span>
@@ -157,9 +177,9 @@ export default async function StudentResourcesPage() {
                     </a>
                   )}
 
-                {resource.fileUrl && (
+                {resource.linkUrl && (
                   <a
-                    href={resource.fileUrl}
+                    href={resource.linkUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
@@ -171,12 +191,36 @@ export default async function StudentResourcesPage() {
             </article>
           ))
         ) : (
-          <div className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm md:col-span-2 xl:col-span-3">
+          <div className="col-span-2 rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm xl:col-span-4">
             <p className="text-sm text-slate-600">
               No resources have been uploaded for your track yet.
             </p>
           </div>
         )}
+      </section>
+
+      <section className="flex items-center justify-between text-sm">
+        <a
+          href={`?page=${currentPage - 1}`}
+          className={`font-medium text-slate-700 ${
+            currentPage <= 1 ? "pointer-events-none opacity-40" : ""
+          }`}
+        >
+          ← Prev
+        </a>
+
+        <span className="font-medium text-slate-700">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <a
+          href={`?page=${currentPage + 1}`}
+          className={`font-medium text-slate-700 ${
+            currentPage >= totalPages ? "pointer-events-none opacity-40" : ""
+          }`}
+        >
+          Next →
+        </a>
       </section>
     </main>
   );

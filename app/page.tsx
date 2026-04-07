@@ -91,16 +91,16 @@ function Counter({
 
 function StatCard({ item }: { item: StatItem }) {
   return (
-    <div className="rounded-[1.75rem] border border-green-100 bg-white p-8 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-      <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-green-700 ring-1 ring-green-100">
+    <div className="rounded-[1.25rem] border border-green-100 bg-white p-4 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-6 lg:rounded-[1.75rem] lg:p-8">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-700 ring-1 ring-green-100 sm:h-16 sm:w-16 lg:h-20 lg:w-20">
         <div className="animate-[float_3s_ease-in-out_infinite]">{item.icon}</div>
       </div>
 
-      <div className="mt-6 text-5xl font-bold tracking-tight text-black sm:text-6xl">
+      <div className="mt-4 text-2xl font-bold tracking-tight text-black sm:mt-5 sm:text-4xl lg:mt-6 lg:text-5xl">
         <Counter end={item.value} suffix={item.suffix} />
       </div>
 
-      <p className="mx-auto mt-5 max-w-xs text-[15px] leading-9 text-slate-700">
+      <p className="mx-auto mt-3 max-w-xs text-[12px] leading-6 text-slate-700 sm:text-[13px] sm:leading-7 lg:mt-5 lg:text-[15px] lg:leading-9">
         {item.label}
       </p>
     </div>
@@ -194,27 +194,27 @@ export default function Home() {
       suffix: "+",
       label:
         "Number of girls trained across Nigeria’s 36 states and the Federal Capital Territory",
-      icon: <Globe className="h-8 w-8 text-green-700" />,
+      icon: <Globe className="h-6 w-6 text-green-700 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />,
     },
     {
       value: 7200,
       suffix: "+",
       label:
         "Number of Girls Re-enrolled After Dropping Out of School, Giving Them a Second Chance at Education",
-      icon: <School className="h-8 w-8 text-green-700" />,
+      icon: <School className="h-6 w-6 text-green-700 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />,
     },
     {
       value: 2000,
       suffix: "+",
       label:
         "Number of Young Women Introduced to STEM Opportunities and Provided Intensive Training in Fields such as Cybersecurity, Software Development, and Data Analytics",
-      icon: <Monitor className="h-8 w-8 text-green-700" />,
+      icon: <Monitor className="h-6 w-6 text-green-700 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />,
     },
     {
       value: 100,
       suffix: "+",
       label: "Number of Girls Trained in Digital Skills",
-      icon: <Code2 className="h-8 w-8 text-green-700" />,
+      icon: <Code2 className="h-6 w-6 text-green-700 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />,
     },
   ];
 
@@ -267,66 +267,68 @@ export default function Home() {
           <div className="absolute inset-0 bg-green-950/45" />
           <div className="absolute inset-0 bg-gradient-to-r from-green-950/70 via-green-900/35 to-green-800/45" />
 
-          <div className="relative mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-20">
-            <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+          <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-10 lg:py-20">
+            <div className="grid grid-cols-[1.05fr_0.95fr] gap-3 items-start lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
               <div className="max-w-3xl text-white">
-                <p className="mb-4 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur">
+                <p className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-medium backdrop-blur sm:mb-4 sm:px-4 sm:py-2 sm:text-sm">
                   Akwa Ibom Digital Skills Training
                 </p>
 
-                <h1 className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+                <h1 className="text-2xl font-bold leading-tight sm:text-4xl lg:text-6xl">
                   G4EP Project RISE
                   <br />
                   Command Center
                 </h1>
 
-                <p className="mt-6 max-w-2xl text-base leading-8 text-green-50/90 sm:text-lg">
+                <p className="mt-3 max-w-2xl text-[12px] leading-5 text-green-50/90 sm:mt-4 sm:text-sm sm:leading-7 lg:mt-6 lg:text-lg lg:leading-8">
                   A unified training portal for learning, project submission,
                   student progress tracking, attendance, and certification
                   across Web Design, Photography, Videography, Graphic Design,
                   and AI.
                 </p>
 
-                <div className="mt-8 flex flex-wrap gap-4">
+                <div className="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:flex-wrap sm:gap-3 lg:mt-8 lg:gap-4">
                   <a
                     href="https://form.jotform.com/252385187138565"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-full bg-white px-6 py-3 font-semibold text-green-900 transition hover:bg-green-50"
+                    className="rounded-full bg-white px-4 py-2 text-center text-[11px] font-semibold text-green-900 transition hover:bg-green-50 sm:px-5 sm:py-2.5 sm:text-sm lg:px-6 lg:py-3"
                   >
                     Register Now
                   </a>
 
                   <Link
                     href="#tracks"
-                    className="rounded-full border border-white/30 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
+                    className="rounded-full border border-white/30 px-4 py-2 text-center text-[11px] font-semibold text-white transition hover:bg-white/10 sm:px-5 sm:py-2.5 sm:text-sm lg:px-6 lg:py-3"
                   >
                     Explore Tracks
                   </Link>
                 </div>
               </div>
 
-              <div className="justify-self-end rounded-[2rem] border border-white/15 bg-white/[0.01] p-5 shadow-2xl backdrop-blur-2xl sm:p-6 lg:max-w-[520px]">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white">
+              <div className="justify-self-end rounded-[1.25rem] border border-white/15 bg-white/[0.01] p-3 shadow-2xl backdrop-blur-2xl sm:rounded-[1.5rem] sm:p-4 lg:max-w-[520px] lg:rounded-[2rem] lg:p-6">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white sm:text-xs sm:tracking-[0.18em]">
                   Program Focus
                 </p>
 
-                <h2 className="mt-3 text-3xl font-bold leading-tight text-white">
+                <h2 className="mt-2 text-lg font-bold leading-tight text-white sm:text-2xl lg:mt-3 lg:text-3xl">
                   Training for impact, creativity, and career growth
                 </h2>
 
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="mt-3 grid gap-2 sm:mt-4 sm:grid-cols-2 lg:mt-6 lg:gap-4">
                   {tracks.map((track) => (
                     <div
                       key={track.name}
-                      className="rounded-2xl border border-white/15 bg-white/[0.05] px-4 py-4 text-white"
+                      className="rounded-xl border border-white/15 bg-white/[0.05] px-3 py-2 text-white sm:rounded-2xl sm:px-4 sm:py-3 lg:px-4 lg:py-4"
                     >
-                      <p className="font-semibold">{track.name}</p>
+                      <p className="text-[11px] font-semibold sm:text-sm">
+                        {track.name}
+                      </p>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.03] px-4 py-4 text-sm leading-7 text-green-50/90">
+                <div className="mt-3 rounded-xl border border-dashed border-white/15 bg-white/[0.03] px-3 py-2.5 text-[11px] leading-5 text-green-50/90 sm:mt-4 sm:rounded-2xl sm:px-4 sm:py-4 sm:text-xs sm:leading-6 lg:mt-6 lg:text-sm lg:leading-7">
                   This portal supports the full training journey from onboarding
                   to resources, assignments, submissions, attendance, and
                   certificate readiness.
@@ -337,32 +339,31 @@ export default function Home() {
         </section>
 
         {/* ABOUT */}
-        <section className="mx-auto max-w-7xl px-6 py-16 lg:px-10">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
-            {/* LEFT SIDE TEXT */}
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-10 lg:py-16">
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-10">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
                 About the Program
               </p>
 
-              <h2 className="mt-3 text-3xl font-bold text-slate-900">
+              <h2 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
                 RISE Project (Renewed Hope for Inclusion, Support, and Empowerment)
               </h2>
 
-              <p className="mt-5 text-base leading-8 text-slate-600">
+              <p className="mt-5 text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
                 The RISE Project is a youth and student empowerment initiative led by
                 the Office of the Senior Special Assistant to the President on Student
                 Engagement, under the leadership of Hon. Comrade Sunday Asefon.
               </p>
 
-              <p className="mt-4 text-base leading-8 text-slate-600">
+              <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
                 As part of the Renewed Hope Agenda of President Bola Ahmed Tinubu, the
                 project is focused on bridging the digital divide and promoting economic
                 self-reliance among Nigerian students, with special attention to the
                 girl child.
               </p>
 
-              <p className="mt-4 text-base leading-8 text-slate-600">
+              <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
                 Through the program, participants are equipped with practical digital
                 skills such as web design, photography, cinematography, and mobile
                 technology, while also being guided in leadership, critical thinking,
@@ -370,83 +371,81 @@ export default function Home() {
               </p>
             </div>
 
-            {/* RIGHT SIDE BIG BOXES */}
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="rounded-[2rem] border border-green-100 bg-green-50 p-8 shadow-sm">
-                <h3 className="text-2xl font-semibold text-green-900">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6">
+              <div className="rounded-[1.5rem] border border-green-100 bg-green-50 p-5 shadow-sm sm:rounded-[2rem] sm:p-8">
+                <h3 className="text-lg font-semibold text-green-900 sm:text-2xl">
                   Digital Skills
                 </h3>
-                <p className="mt-4 text-base leading-8 text-slate-600">
+                <p className="mt-3 text-sm leading-7 text-slate-600 sm:mt-4 sm:text-base sm:leading-8">
                   Hands-on training in web design, photography, videography, and mobile
                   technology.
                 </p>
               </div>
 
-              <div className="rounded-[2rem] border border-green-100 bg-white p-8 shadow-sm">
-                <h3 className="text-2xl font-semibold text-green-900">
+              <div className="rounded-[1.5rem] border border-green-100 bg-white p-5 shadow-sm sm:rounded-[2rem] sm:p-8">
+                <h3 className="text-lg font-semibold text-green-900 sm:text-2xl">
                   Inclusion & Empowerment
                 </h3>
-                <p className="mt-4 text-base leading-8 text-slate-600">
+                <p className="mt-3 text-sm leading-7 text-slate-600 sm:mt-4 sm:text-base sm:leading-8">
                   Focused on ensuring the girl child and vulnerable students are not
                   left behind.
                 </p>
               </div>
 
-              <div className="rounded-[2rem] border border-green-100 bg-white p-8 shadow-sm">
-                <h3 className="text-2xl font-semibold text-green-900">
+              <div className="rounded-[1.5rem] border border-green-100 bg-white p-5 shadow-sm sm:rounded-[2rem] sm:p-8">
+                <h3 className="text-lg font-semibold text-green-900 sm:text-2xl">
                   Leadership Growth
                 </h3>
-                <p className="mt-4 text-base leading-8 text-slate-600">
+                <p className="mt-3 text-sm leading-7 text-slate-600 sm:mt-4 sm:text-base sm:leading-8">
                   Mentorship in leadership, critical thinking, and problem-solving
                   skills.
                 </p>
               </div>
 
-              <div className="rounded-[2rem] border border-green-100 bg-green-50 p-8 shadow-sm">
-                <h3 className="text-2xl font-semibold text-green-900">
+              <div className="rounded-[1.5rem] border border-green-100 bg-green-50 p-5 shadow-sm sm:rounded-[2rem] sm:p-8">
+                <h3 className="text-lg font-semibold text-green-900 sm:text-2xl">
                   Academic Excellence
                 </h3>
-                <p className="mt-4 text-base leading-8 text-slate-600">
+                <p className="mt-3 text-sm leading-7 text-slate-600 sm:mt-4 sm:text-base sm:leading-8">
                   Recognition and support for outstanding academic performance.
                 </p>
               </div>
             </div>
 
-            {/* FULL WIDTH FOUR CARDS */}
             <div className="lg:col-span-2">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-[2rem] border border-green-100 bg-green-50 p-8 shadow-sm">
-                  <h3 className="text-2xl font-semibold text-green-900">
+              <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+                <div className="rounded-[1.5rem] border border-green-100 bg-green-50 p-5 shadow-sm sm:rounded-[2rem] sm:p-8">
+                  <h3 className="text-lg font-semibold text-green-900 sm:text-2xl">
                     Student Workspace
                   </h3>
-                  <p className="mt-4 text-base leading-8 text-slate-600">
+                  <p className="mt-3 text-sm leading-7 text-slate-600 sm:mt-4 sm:text-base sm:leading-8">
                     Access resources, submit projects, and track progress.
                   </p>
                 </div>
 
-                <div className="rounded-[2rem] border border-green-100 bg-white p-8 shadow-sm">
-                  <h3 className="text-2xl font-semibold text-green-900">
+                <div className="rounded-[1.5rem] border border-green-100 bg-white p-5 shadow-sm sm:rounded-[2rem] sm:p-8">
+                  <h3 className="text-lg font-semibold text-green-900 sm:text-2xl">
                     Teacher Management
                   </h3>
-                  <p className="mt-4 text-base leading-8 text-slate-600">
+                  <p className="mt-3 text-sm leading-7 text-slate-600 sm:mt-4 sm:text-base sm:leading-8">
                     Upload materials, assign tasks, and review submissions.
                   </p>
                 </div>
 
-                <div className="rounded-[2rem] border border-green-100 bg-white p-8 shadow-sm">
-                  <h3 className="text-2xl font-semibold text-green-900">
+                <div className="rounded-[1.5rem] border border-green-100 bg-white p-5 shadow-sm sm:rounded-[2rem] sm:p-8">
+                  <h3 className="text-lg font-semibold text-green-900 sm:text-2xl">
                     Admin Oversight
                   </h3>
-                  <p className="mt-4 text-base leading-8 text-slate-600">
+                  <p className="mt-3 text-sm leading-7 text-slate-600 sm:mt-4 sm:text-base sm:leading-8">
                     Manage users, attendance, and training activities.
                   </p>
                 </div>
 
-                <div className="rounded-[2rem] border border-green-100 bg-green-50 p-8 shadow-sm">
-                  <h3 className="text-2xl font-semibold text-green-900">
+                <div className="rounded-[1.5rem] border border-green-100 bg-green-50 p-5 shadow-sm sm:rounded-[2rem] sm:p-8">
+                  <h3 className="text-lg font-semibold text-green-900 sm:text-2xl">
                     Practical Learning
                   </h3>
-                  <p className="mt-4 text-base leading-8 text-slate-600">
+                  <p className="mt-3 text-sm leading-7 text-slate-600 sm:mt-4 sm:text-base sm:leading-8">
                     Hands-on projects and real-world skill development.
                   </p>
                 </div>
@@ -456,9 +455,9 @@ export default function Home() {
         </section>
 
         {/* STATS */}
-        <section className="bg-[#f7faf7] py-20">
-          <div className="mx-auto max-w-7xl px-6 lg:px-10">
-            <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-4">
+        <section className="bg-[#f7faf7] py-14 sm:py-16 lg:py-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:gap-10 xl:grid-cols-4">
               {stats.map((item, index) => (
                 <StatCard key={index} item={item} />
               ))}
@@ -467,23 +466,23 @@ export default function Home() {
         </section>
 
         {/* TRACKS */}
-        <section id="tracks" className="bg-green-50 py-16">
-          <div className="mx-auto max-w-7xl px-6 lg:px-10">
+        <section id="tracks" className="bg-green-50 py-12 sm:py-14 lg:py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
               Training Tracks
             </p>
 
-            <h2 className="mt-3 text-3xl font-bold text-slate-900">
+            <h2 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
               High-impact digital skill areas
             </h2>
 
-            <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-5">
+            <div className="mt-8 grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-5">
               {tracks.map((track) => (
                 <div
                   key={track.name}
-                  className="flex flex-col rounded-3xl bg-white p-6 shadow-sm ring-1 ring-green-100"
+                  className="flex flex-col rounded-3xl bg-white p-5 shadow-sm ring-1 ring-green-100 sm:p-6"
                 >
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-green-100 text-2xl">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-green-100 text-2xl sm:h-14 sm:w-14">
                     {track.icon}
                   </div>
 
@@ -512,20 +511,20 @@ export default function Home() {
         </section>
 
         {/* LEADERSHIP */}
-        <section className="mx-auto max-w-7xl px-6 py-16 lg:px-10">
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-10 lg:py-16">
           <div className="text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
               Leadership & Vision
             </p>
-            <h2 className="mt-3 text-3xl font-bold text-slate-900">
+            <h2 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
               The driving force behind G4EP Project RISE
             </h2>
           </div>
 
-          <div className="mt-12 grid gap-8 lg:grid-cols-2">
-            <div className="rounded-[2rem] border border-green-100 bg-white p-6 shadow-sm">
+          <div className="mt-10 grid gap-6 sm:gap-8 lg:mt-12 lg:grid-cols-2">
+            <div className="rounded-[2rem] border border-green-100 bg-white p-5 shadow-sm sm:p-6">
               <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 overflow-hidden rounded-full border border-green-100 bg-green-50">
+                <div className="relative h-16 w-16 overflow-hidden rounded-full border border-green-100 bg-green-50 sm:h-20 sm:w-20">
                   <Image
                     src="/leaders/sunday-asefon.jpg"
                     alt="Sunday Asefon"
@@ -535,7 +534,7 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <h3 className="text-2xl font-bold text-slate-900">
+                  <h3 className="text-xl font-bold text-slate-900 sm:text-2xl">
                     Sunday Asefon
                   </h3>
                   <p className="text-sm font-medium text-green-700">
@@ -567,9 +566,9 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-green-100 bg-white p-6 shadow-sm">
+            <div className="rounded-[2rem] border border-green-100 bg-white p-5 shadow-sm sm:p-6">
               <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 overflow-hidden rounded-full border border-green-100 bg-green-50">
+                <div className="relative h-16 w-16 overflow-hidden rounded-full border border-green-100 bg-green-50 sm:h-20 sm:w-20">
                   <Image
                     src="/leaders/judith-ogbara.jpg"
                     alt="Hon. Dr. Judith Mayen Etuk-Ogbara"
@@ -579,7 +578,7 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <h3 className="text-2xl font-bold text-slate-900">
+                  <h3 className="text-xl font-bold text-slate-900 sm:text-2xl">
                     Hon. Dr. Judith Mayen Etuk-Ogbara
                   </h3>
                   <p className="text-sm font-medium text-green-700">
@@ -614,33 +613,33 @@ export default function Home() {
         </section>
 
         {/* THROWBACK GALLERY */}
-        <section className="mx-auto max-w-7xl px-6 py-16 lg:px-10">
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-10 lg:py-16">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
                 Abuja Throwback
               </p>
 
-              <h2 className="mt-3 text-3xl font-bold text-slate-900">
+              <h2 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
                 Moments from previous training sessions
               </h2>
 
-              <p className="mt-4 max-w-3xl text-base leading-8 text-slate-600">
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
                 A look back at inspiring moments from the Abuja training,
                 highlighting participation, community, learning, and impact.
               </p>
             </div>
           </div>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-8 grid grid-cols-3 gap-3 sm:mt-10 sm:gap-4 xl:grid-cols-4 xl:gap-6">
             {galleryImages.map((image, index) => (
               <button
                 key={image}
                 type="button"
                 onClick={() => setSelectedImage(image)}
-                className="group overflow-hidden rounded-[1.75rem] border border-green-100 bg-white text-left shadow-sm transition hover:shadow-md"
+                className="group overflow-hidden rounded-[1rem] border border-green-100 bg-white text-left shadow-sm transition hover:shadow-md sm:rounded-[1.25rem] lg:rounded-[1.75rem]"
               >
-                <div className="relative aspect-[4/4] w-full overflow-hidden">
+                <div className="relative aspect-square w-full overflow-hidden">
                   <Image
                     src={image}
                     alt={`Abuja training throwback ${index + 1}`}
@@ -648,34 +647,33 @@ export default function Home() {
                     className="object-cover transition duration-300 group-hover:scale-105"
                   />
                 </div>
-
               </button>
             ))}
           </div>
         </section>
 
         {/* TESTIMONIALS */}
-        <section className="bg-[#f7faf7] py-20">
-          <div className="mx-auto max-w-7xl px-6 lg:px-10">
+        <section className="bg-[#f7faf7] py-14 sm:py-16 lg:py-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
             <div className="text-center">
-              <h2 className="text-4xl font-semibold uppercase tracking-tight text-black sm:text-5xl">
+              <h2 className="text-2xl font-semibold uppercase tracking-tight text-black sm:text-4xl lg:text-5xl">
                 What Our Participants Say
               </h2>
-              <div className="mx-auto mt-4 h-1 w-40 bg-green-700 sm:w-72" />
+              <div className="mx-auto mt-4 h-1 w-28 bg-green-700 sm:w-48 lg:w-72" />
             </div>
 
-            <div className="mt-16 grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-10 grid grid-cols-2 gap-4 sm:mt-12 sm:gap-6 xl:grid-cols-4 xl:gap-8">
               {testimonials.map((item) => (
                 <div
                   key={item.name}
-                  className="rounded-[1.75rem] border border-green-200 bg-white p-6 shadow-sm"
+                  className="rounded-[1.25rem] border border-green-200 bg-white p-4 shadow-sm sm:rounded-[1.5rem] sm:p-5 lg:rounded-[1.75rem] lg:p-6"
                 >
-                  <p className="text-[18px] leading-9 text-black">
+                  <p className="text-[13px] leading-7 text-black sm:text-[15px] sm:leading-8 lg:text-[18px] lg:leading-9">
                     {item.quote}
                   </p>
 
-                  <div className="mt-10 flex items-center gap-4">
-                    <div className="relative h-24 w-24 overflow-hidden rounded-full border border-green-200">
+                  <div className="mt-6 flex items-center gap-3 sm:mt-8 sm:gap-4 lg:mt-10">
+                    <div className="relative h-14 w-14 overflow-hidden rounded-full border border-green-200 sm:h-16 sm:w-16 lg:h-24 lg:w-24">
                       <Image
                         src={item.image}
                         alt={item.name}
@@ -685,10 +683,12 @@ export default function Home() {
                     </div>
 
                     <div>
-                      <h3 className="text-2xl font-bold text-black">
+                      <h3 className="text-base font-bold text-black sm:text-lg lg:text-2xl">
                         {item.name}
                       </h3>
-                      <p className="text-xl text-slate-400">{item.role}</p>
+                      <p className="text-sm text-slate-400 sm:text-base lg:text-xl">
+                        {item.role}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -698,24 +698,24 @@ export default function Home() {
         </section>
 
         {/* FAQ */}
-        <section className="bg-white py-16">
-          <div className="mx-auto max-w-4xl px-6 lg:px-10">
+        <section className="bg-white py-12 sm:py-14 lg:py-16">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-10">
             <div className="text-center">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
                 FAQ
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-slate-900">
+              <h2 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
                 Frequently Asked Questions
               </h2>
             </div>
 
-            <div className="mt-10 space-y-4">
+            <div className="mt-8 space-y-4 sm:mt-10">
               {faqs.map((item, i) => (
                 <details
                   key={i}
-                  className="rounded-2xl border border-green-100 bg-green-50 p-5"
+                  className="rounded-2xl border border-green-100 bg-green-50 p-4 sm:p-5"
                 >
-                  <summary className="cursor-pointer font-semibold text-green-900">
+                  <summary className="cursor-pointer text-sm font-semibold text-green-900 sm:text-base">
                     {item.q}
                   </summary>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
@@ -728,13 +728,13 @@ export default function Home() {
         </section>
 
         {/* CTA */}
-        <section className="mx-auto max-w-7xl px-6 py-16 lg:px-10">
-          <div className="rounded-[2rem] bg-green-900 px-8 py-12 text-center text-white">
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-10 lg:py-16">
+          <div className="rounded-[1.5rem] bg-green-900 px-5 py-10 text-center text-white sm:rounded-[2rem] sm:px-8 sm:py-12">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-100">
               Ready to Join?
             </p>
 
-            <h2 className="mt-3 text-3xl font-bold">
+            <h2 className="mt-3 text-2xl font-bold sm:text-3xl">
               Start your digital skills journey with G4EP
             </h2>
 
@@ -743,7 +743,7 @@ export default function Home() {
               training portal, submit projects, and track your progress.
             </p>
 
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
               <a
                 href="https://form.jotform.com/252385187138565"
                 target="_blank"

@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
+const PAGE_SIZE = 8;
+
 function isPdfFile(url?: string | null) {
   if (!url) return false;
   return url.toLowerCase().includes(".pdf");
@@ -13,7 +15,6 @@ function isImageFile(url?: string | null) {
 
   const lower = url.toLowerCase();
 
-  // 🚨 block PDF from being treated as image
   if (lower.includes(".pdf")) return false;
 
   return (
@@ -25,7 +26,14 @@ function isImageFile(url?: string | null) {
   );
 }
 
-export default async function StudentAssignmentsPage() {
+export default async function StudentAssignmentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const page = Number(params.page ?? "1");
+
   const currentUser = await requireRole("STUDENT");
 
   const studentUser = await db.user.findUnique({
@@ -39,6 +47,16 @@ export default async function StudentAssignmentsPage() {
 
   const student = studentUser.student;
 
+  const totalAssignments = await db.assignment.count({
+    where: {
+      track: student.track,
+      isPublished: true,
+    },
+  });
+
+  const totalPages = Math.max(1, Math.ceil(totalAssignments / PAGE_SIZE));
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
+
   const assignments = await db.assignment.findMany({
     where: {
       track: student.track,
@@ -51,10 +69,12 @@ export default async function StudentAssignmentsPage() {
       },
     },
     orderBy: { createdAt: "desc" },
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
   });
 
   const unseenAssignments = assignments.filter(
-    (a) => !a.views[0]?.seenAt
+    (assignment) => !assignment.views[0]?.seenAt
   );
 
   if (unseenAssignments.length > 0) {
@@ -79,134 +99,150 @@ export default async function StudentAssignmentsPage() {
   }
 
   return (
-    <main className="space-y-6">
-      {/* HEADER */}
-      <section className="rounded-[2rem] bg-gradient-to-r from-emerald-800 via-green-700 to-lime-500 p-6 text-white">
-        <h1 className="text-3xl font-bold">My Assignments</h1>
-        <p className="mt-3 text-sm">
-          View assignments, PDFs, images, and links from your teacher.
+    <main className="space-y-4">
+      <section className="overflow-hidden border border-emerald-200 bg-gradient-to-r from-emerald-950 via-emerald-700 to-lime-500 px-4 py-3 text-white shadow-sm">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-100/90">
+          Assignments
+        </p>
+
+        <h1 className="mt-1 text-xl font-bold sm:text-2xl">
+          My Assignments
+        </h1>
+
+        <p className="mt-1 text-sm text-emerald-50/90">
+          View tasks, files, and instructions from your teacher.
         </p>
       </section>
 
-      {/* LIST */}
-      <section className="space-y-5">
-        {assignments.map((assignment) => {
-          const isNew = !assignment.views[0]?.seenAt;
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        {assignments.length > 0 ? (
+          assignments.map((assignment) => {
+            const isNew = !assignment.views[0]?.seenAt;
 
-          return (
-            <article
-              key={assignment.id}
-              className="rounded-2xl border bg-white p-6 shadow-sm"
-            >
-              {/* TITLE */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-xl font-bold">{assignment.title}</h2>
+            return (
+              <article
+                key={assignment.id}
+                className="border border-emerald-100 bg-white p-4 shadow-sm"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-sm font-bold text-slate-900 sm:text-base">
+                    {assignment.title}
+                  </h2>
 
-                {isNew && (
-                  <span className="bg-red-100 text-red-700 px-2 py-1 text-xs rounded-full">
-                    New
-                  </span>
-                )}
+                  {isNew && (
+                    <span className="bg-red-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-red-700">
+                      New
+                    </span>
+                  )}
 
-                {assignment.attachmentUrl && (
-                  <span className="bg-sky-100 text-sky-700 px-2 py-1 text-xs rounded-full">
-                    {isPdfFile(assignment.attachmentUrl)
-                      ? "PDF"
-                      : isImageFile(assignment.attachmentUrl)
-                      ? "Image"
-                      : "Attachment"}
-                  </span>
-                )}
-              </div>
+                  {assignment.attachmentUrl && (
+                    <span className="bg-sky-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-sky-700">
+                      {isPdfFile(assignment.attachmentUrl)
+                        ? "PDF"
+                        : isImageFile(assignment.attachmentUrl)
+                        ? "Image"
+                        : "File"}
+                    </span>
+                  )}
 
-              {/* META */}
-              <div className="mt-3 text-sm text-slate-600">
-                Teacher: {assignment.teacher.user.name}
-              </div>
+                  {assignment.linkUrl && (
+                    <span className="bg-indigo-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-indigo-700">
+                      Link
+                    </span>
+                  )}
+                </div>
 
-              {/* CONTENT */}
-              <div className="mt-5 space-y-4">
+                <p className="mt-2 text-sm text-slate-600">
+                  Teacher: {assignment.teacher.user.name}
+                </p>
+
                 {assignment.question && (
-                  <ContentBlock title="Instructions">
-                    {assignment.question}
-                  </ContentBlock>
+                  <div className="mt-3 border border-emerald-100 bg-emerald-50/30 p-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                      Instructions
+                    </p>
+                    <p className="mt-2 line-clamp-4 text-sm leading-6 text-slate-700">
+                      {assignment.question}
+                    </p>
+                  </div>
                 )}
 
-                {/* IMAGE */}
-                {assignment.attachmentUrl &&
-                  isImageFile(assignment.attachmentUrl) && (
-                    <ContentBlock title="Image">
-                      <a
-                        href={assignment.attachmentUrl}
-                        target="_blank"
-                        className="btn"
-                      >
-                        View Image
-                      </a>
-                    </ContentBlock>
+                <div className="mt-3 space-y-2">
+                  {assignment.attachmentUrl && (
+                    <div className="border border-emerald-100 bg-emerald-50/30 p-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        Attachment
+                      </p>
+                      <div className="mt-2">
+                        <a
+                          href={assignment.attachmentUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex bg-emerald-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                        >
+                          {isPdfFile(assignment.attachmentUrl)
+                            ? "Open PDF"
+                            : isImageFile(assignment.attachmentUrl)
+                            ? "View Image"
+                            : "Open File"}
+                        </a>
+                      </div>
+                    </div>
                   )}
 
-                {/* PDF */}
-                {assignment.attachmentUrl &&
-                  isPdfFile(assignment.attachmentUrl) && (
-                    <ContentBlock title="PDF">
-                      <a
-                        href={assignment.attachmentUrl}
-                        target="_blank"
-                        className="btn"
-                      >
-                        Open PDF
-                      </a>
-                    </ContentBlock>
+                  {assignment.linkUrl && (
+                    <div className="border border-emerald-100 bg-emerald-50/30 p-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        Link
+                      </p>
+                      <div className="mt-2">
+                        <a
+                          href={assignment.linkUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex bg-indigo-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                        >
+                          Open Link
+                        </a>
+                      </div>
+                    </div>
                   )}
+                </div>
+              </article>
+            );
+          })
+        ) : (
+          <div className="col-span-2 border border-emerald-100 bg-white p-4 shadow-sm xl:col-span-4">
+            <p className="text-sm text-slate-600">
+              No assignments available at the moment.
+            </p>
+          </div>
+        )}
+      </section>
 
-                {/* OTHER FILE */}
-                {assignment.attachmentUrl &&
-                  !isImageFile(assignment.attachmentUrl) &&
-                  !isPdfFile(assignment.attachmentUrl) && (
-                    <ContentBlock title="Attachment">
-                      <a
-                        href={assignment.attachmentUrl}
-                        target="_blank"
-                        className="btn"
-                      >
-                        Open File
-                      </a>
-                    </ContentBlock>
-                  )}
+      <section className="flex items-center justify-between text-sm">
+        <a
+          href={`?page=${currentPage - 1}`}
+          className={`font-medium text-slate-700 ${
+            currentPage <= 1 ? "pointer-events-none opacity-40" : ""
+          }`}
+        >
+          ← Prev
+        </a>
 
-                {/* LINK */}
-                {assignment.linkUrl && (
-                  <ContentBlock title="Link">
-                    <a
-                      href={assignment.linkUrl}
-                      target="_blank"
-                      className="btn"
-                    >
-                      Open Link
-                    </a>
-                  </ContentBlock>
-                )}
-              </div>
-            </article>
-          );
-        })}
+        <span className="font-medium text-slate-700">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <a
+          href={`?page=${currentPage + 1}`}
+          className={`font-medium text-slate-700 ${
+            currentPage >= totalPages ? "pointer-events-none opacity-40" : ""
+          }`}
+        >
+          Next →
+        </a>
       </section>
     </main>
-  );
-}
-
-function ContentBlock({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="bg-slate-50 p-4 rounded-xl">
-      <p className="text-xs font-bold text-slate-500 uppercase">{title}</p>
-      <div className="mt-2 text-sm">{children}</div>
-    </div>
   );
 }

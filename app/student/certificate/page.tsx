@@ -8,12 +8,8 @@ export default async function StudentCertificatePage() {
   const currentUser = await requireRole("STUDENT");
 
   const studentUser = await db.user.findUnique({
-    where: {
-      id: currentUser.userId,
-    },
-    include: {
-      student: true,
-    },
+    where: { id: currentUser.userId },
+    include: { student: true },
   });
 
   if (!studentUser || !studentUser.student) {
@@ -23,12 +19,8 @@ export default async function StudentCertificatePage() {
   const student = studentUser.student;
 
   const certificate = await db.certificate.findFirst({
-    where: {
-      studentId: student.id,
-    },
-    orderBy: {
-      issuedAt: "desc",
-    },
+    where: { studentId: student.id },
+    orderBy: { issuedAt: "desc" },
   });
 
   const metrics = await getStudentAttendanceMetrics(student.id);
@@ -36,68 +28,76 @@ export default async function StudentCertificatePage() {
   const certificateStatus = certificate?.status ?? "NO RECORD";
 
   return (
-    <main className="space-y-6">
-      <section className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-emerald-800 via-green-700 to-lime-500 p-6 text-white shadow-lg shadow-emerald-200/50 sm:p-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50/90">
+    <main className="space-y-4">
+      <section className="overflow-hidden border border-emerald-200 bg-gradient-to-r from-emerald-950 via-emerald-700 to-lime-500 px-4 py-3 text-white shadow-sm">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-100/90">
           Certificate
         </p>
 
-        <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
+        <h1 className="mt-1 text-xl font-bold sm:text-2xl">
           Certificate Status
         </h1>
 
-        <p className="mt-4 max-w-3xl text-sm leading-7 text-emerald-50/90 sm:text-base">
-          Review your attendance performance, track your certificate status,
-          and access your certificate preview and download once it has been issued.
+        <p className="mt-1 text-sm text-emerald-50/90">
+          Review your performance and access your certificate when issued.
         </p>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
         <StatCard
           label="Present"
           value={metrics.presentCount}
-          tone="bg-emerald-50"
-          valueClass="text-emerald-700"
+          note="Recorded check-ins"
+          soft="from-green-50 to-white"
+          border="border-green-100"
+          line="from-green-600 to-emerald-600"
+          valueColor="text-green-700"
         />
-
         <StatCard
           label="Absent"
           value={metrics.absentCount}
-          tone="bg-red-50"
-          valueClass="text-red-600"
+          note="Missed sessions"
+          soft="from-red-50 to-white"
+          border="border-red-100"
+          line="from-red-500 to-rose-500"
+          valueColor="text-red-600"
         />
-
         <StatCard
           label="Sessions"
           value={metrics.totalSessions}
-          tone="bg-white"
-          valueClass="text-slate-900"
+          note="Total attendance records"
+          soft="from-slate-50 to-white"
+          border="border-slate-200"
+          line="from-slate-500 to-slate-400"
+          valueColor="text-slate-900"
         />
-
         <StatCard
           label="Attendance %"
           value={`${metrics.attendancePercentage}%`}
-          tone="bg-lime-50"
-          valueClass="text-lime-700"
+          note="Current performance"
+          soft="from-lime-50 to-white"
+          border="border-lime-100"
+          line="from-lime-500 to-emerald-500"
+          valueColor="text-lime-700"
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <section className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
+      <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <div className="border border-emerald-100 bg-white p-4 shadow-sm">
           {certificate ? (
             <>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
                     Certificate Record
                   </p>
-                  <h2 className="mt-2 text-2xl font-bold text-slate-900">
+                  <h2 className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
                     Certificate of Completion
                   </h2>
                 </div>
 
                 <span
-                  className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] ${
+                  className={`px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${
                     certificate.status === "ISSUED"
                       ? "bg-green-100 text-green-700"
                       : "bg-yellow-100 text-yellow-700"
@@ -107,7 +107,7 @@ export default async function StudentCertificatePage() {
                 </span>
               </div>
 
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
                 <InfoCard label="Student" value={studentUser.name} />
                 <InfoCard label="Track" value={student.track} />
                 <InfoCard
@@ -125,98 +125,87 @@ export default async function StudentCertificatePage() {
               </div>
 
               <div
-                className={`mt-6 rounded-[1.5rem] p-5 ring-1 ${
+                className={`mt-4 border p-3 text-sm ${
                   certificate.status === "ISSUED"
-                    ? "bg-green-50 ring-green-100"
-                    : "bg-yellow-50 ring-yellow-100"
+                    ? "border-green-200 bg-green-50 text-slate-700"
+                    : "border-yellow-200 bg-yellow-50 text-slate-700"
                 }`}
               >
-                <p className="text-sm font-semibold text-slate-800">
-                  Certificate Update
-                </p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {certificate.status === "ISSUED"
-                    ? "Your certificate has been issued and is now ready for preview and download."
-                    : "Your certificate record already exists, but it has not been issued yet. Keep checking back after your review is complete."}
-                </p>
+                {certificate.status === "ISSUED"
+                  ? "Your certificate has been issued and is now ready for preview and download."
+                  : "Your certificate record exists, but it has not been issued yet. Please check back later."}
               </div>
 
               {certificate.status === "ISSUED" && (
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="mt-4 flex flex-wrap gap-2">
                   <a
                     href="/student/certificate/view"
-                    className="inline-block rounded-xl bg-green-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-green-800"
+                    className="bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
                   >
-                    View Certificate Preview
+                    Preview
                   </a>
 
                   <a
                     href="/student/certificate/download"
-                    className="inline-block rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    className="bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
                   >
-                    Download PDF
+                    Download
                   </a>
                 </div>
               )}
             </>
           ) : (
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-700">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
                 Certificate Record
               </p>
 
-              <h2 className="mt-2 text-2xl font-bold text-slate-900">
+              <h2 className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
                 No Certificate Yet
               </h2>
 
-              <div className="mt-6 rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-200">
+              <div className="mt-4 border border-slate-200 bg-slate-50 p-4">
                 <p className="text-sm leading-6 text-slate-600">
                   No certificate record has been created for your account yet.
-                  Once the training review process is completed, your certificate status will appear here.
+                  Once the review process is completed, your certificate status will appear here.
                 </p>
               </div>
             </div>
           )}
-        </section>
+        </div>
 
-        <section className="space-y-6">
-          <div className="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-700">
+        <div className="space-y-4">
+          <div className="border border-emerald-100 bg-white p-4 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
               Attendance Summary
             </p>
 
-            <div className="mt-5 space-y-4">
-              <SummaryRow label="Present Sessions" value={`${metrics.presentCount}`} />
-              <SummaryRow label="Absent Sessions" value={`${metrics.absentCount}`} />
-              <SummaryRow label="Total Sessions" value={`${metrics.totalSessions}`} />
+            <div className="mt-4 space-y-2.5">
+              <SummaryRow label="Present" value={`${metrics.presentCount}`} />
+              <SummaryRow label="Absent" value={`${metrics.absentCount}`} />
+              <SummaryRow label="Sessions" value={`${metrics.totalSessions}`} />
               <SummaryRow
-                label="Attendance Rate"
+                label="Rate"
                 value={`${metrics.attendancePercentage}%`}
               />
             </div>
           </div>
 
-          <div className="rounded-[1.75rem] border border-emerald-100 bg-gradient-to-br from-emerald-600 via-green-600 to-lime-500 p-6 text-white shadow-md">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-50/90">
-              Current Standing
+          <div className="border border-emerald-200 bg-gradient-to-br from-emerald-700 via-green-600 to-lime-500 p-4 text-white shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-50/90">
+              Standing
             </p>
 
-            <div className="mt-5 space-y-3">
-              <StatusNote
-                title="Certificate Status"
-                value={certificateStatus}
-              />
-              <StatusNote
-                title="Track"
-                value={student.track}
-              />
+            <div className="mt-3 space-y-2">
+              <StatusNote title="Status" value={certificateStatus} />
+              <StatusNote title="Track" value={student.track} />
               <StatusNote
                 title="Attendance"
                 value={`${metrics.attendancePercentage}%`}
               />
             </div>
           </div>
-        </section>
+        </div>
       </section>
     </main>
   );
@@ -225,18 +214,34 @@ export default async function StudentCertificatePage() {
 function StatCard({
   label,
   value,
-  tone = "bg-white",
-  valueClass = "text-slate-900",
+  note,
+  soft,
+  border,
+  line,
+  valueColor,
 }: {
   label: string;
   value: string | number;
-  tone?: string;
-  valueClass?: string;
+  note: string;
+  soft: string;
+  border: string;
+  line: string;
+  valueColor: string;
 }) {
   return (
-    <div className={`rounded-[1.5rem] p-5 shadow-sm ring-1 ring-slate-200 ${tone}`}>
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className={`mt-2 text-3xl font-bold ${valueClass}`}>{value}</p>
+    <div
+      className={`border bg-gradient-to-br ${soft} ${border} p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md`}
+    >
+      <div className={`h-1.5 w-16 bg-gradient-to-r ${line}`} />
+      <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-[11px]">
+        {label}
+      </p>
+      <h2 className={`mt-1 text-base font-bold sm:text-lg ${valueColor}`}>
+        {value}
+      </h2>
+      <p className="mt-1 text-[10px] leading-4 text-slate-600 sm:text-[11px]">
+        {note}
+      </p>
     </div>
   );
 }
@@ -249,9 +254,11 @@ function InfoCard({
   value?: string | null;
 }) {
   return (
-    <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className="mt-2 text-base font-semibold text-slate-900">
+    <div className="border border-emerald-100 bg-emerald-50/40 p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-semibold text-slate-900 sm:text-base">
         {value ?? "Not Available"}
       </p>
     </div>
@@ -266,7 +273,7 @@ function SummaryRow({
   value?: string | null;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+    <div className="flex items-center justify-between border border-emerald-100 bg-emerald-50/40 px-3 py-3">
       <span className="text-sm font-medium text-slate-500">{label}</span>
       <span className="text-sm font-semibold text-slate-900">
         {value ?? "Not Available"}
@@ -283,11 +290,11 @@ function StatusNote({
   value?: string | null;
 }) {
   return (
-    <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-50/80">
+    <div className="border border-white/10 bg-white/10 px-3 py-2.5">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-50/80">
         {title}
       </p>
-      <p className="mt-2 text-sm font-semibold text-white">
+      <p className="mt-1 text-sm font-semibold text-white">
         {value ?? "Not Available"}
       </p>
     </div>

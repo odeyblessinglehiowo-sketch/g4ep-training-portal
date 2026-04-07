@@ -82,101 +82,78 @@ export default async function StudentDashboardPage() {
       ? "In Progress"
       : "Not Available";
 
-  const stats = [
-    {
-      title: "My Track",
-      value: student.track ?? "Not Assigned",
-      note: "Your assigned training path",
-      soft: "from-emerald-50 to-white",
-      border: "border-emerald-100",
-      line: "from-emerald-600 to-green-500",
-      valueColor: "text-emerald-800",
-    },
-    {
-      title: "Training Materials",
-      value: `${resourcesCount} Resources`,
-      note: "Slides, guides, and practical files",
-      soft: "from-lime-50 to-white",
-      border: "border-lime-100",
-      line: "from-lime-500 to-emerald-500",
-      valueColor: "text-lime-800",
-    },
-    {
-      title: "Assignments",
-      value: `${assignmentsCount} Total`,
-      note: `${unreadAssignmentsCount} new assignment${unreadAssignmentsCount === 1 ? "" : "s"} waiting`,
-      soft: "from-green-50 to-white",
-      border: "border-green-100",
-      line: "from-green-600 to-emerald-600",
-      valueColor: "text-green-800",
-    },
-    {
-      title: "Attendance Rate",
-      value: `${metrics.attendancePercentage}%`,
-      note: `${metrics.presentCount} present, ${metrics.absentCount} absent`,
-      soft: "from-emerald-50 to-lime-50",
-      border: "border-emerald-100",
-      line: "from-emerald-700 to-lime-500",
-      valueColor: "text-emerald-800",
-    },
-  ];
-
   return (
     <main className="space-y-4">
-      <section className="overflow-hidden border border-emerald-200 bg-gradient-to-r from-emerald-950 via-emerald-700 to-lime-500 px-4 py-3 text-white shadow-[0_18px_45px_-22px_rgba(16,185,129,0.55)] sm:px-5">
-        <div className="grid gap-3 xl:grid-cols-[1.2fr_0.9fr] xl:items-start">
-          <div className="max-w-3xl">
-            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-100/90">
+      <section className="overflow-hidden border border-emerald-200 bg-gradient-to-r from-emerald-950 via-emerald-700 to-lime-500 px-4 py-3 text-white shadow-sm">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-100/90">
               Student Dashboard
             </p>
 
-            <h1 className="mt-0.5 text-lg font-bold leading-tight sm:text-xl">
-              Welcome back, {studentUser.name ?? "Student"}
+            <h1 className="mt-1 text-xl font-bold sm:text-2xl">
+              Learning Command Center
             </h1>
 
-            <p className="mt-1 text-[11px] leading-4 text-emerald-50/90 sm:text-xs">
-              Stay on top of your learning journey, monitor attendance, view assignments, submit projects, access materials, and track certificate progress.
+            <p className="mt-1 text-sm text-emerald-50/90">
+              Stay on top of your training progress from one central workspace.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <QuickLink href="/student/resources" label="View Materials" />
-            <QuickLink
+          <div className="grid grid-cols-2 gap-2 sm:w-[300px]">
+            <HeroAction href="/student/resources" label="Materials" />
+            <HeroAction
               href="/student/assignments"
               label="Assignments"
               badge={unreadAssignmentsCount}
             />
-            <QuickLink
+            <HeroAction
               href="/student/submissions"
-              label="Submit Project"
+              label="Submissions"
               badge={reviewedSubmissionsCount}
             />
-            <QuickLink href="/student/certificate" label="Certificate" />
+            <HeroAction href="/student/certificate" label="Certificate" />
           </div>
         </div>
       </section>
 
       <section className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
-        {stats.map((stat) => (
-          <div
-            key={stat.title}
-            className={`border bg-gradient-to-br ${stat.soft} ${stat.border} p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md`}
-          >
-            <div className={`h-1.5 w-16 bg-gradient-to-r ${stat.line}`} />
-
-            <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-[11px]">
-              {stat.title}
-            </p>
-
-            <h2 className={`mt-1 text-base font-bold sm:text-lg ${stat.valueColor}`}>
-              {stat.value}
-            </h2>
-
-            <p className="mt-1 text-[10px] leading-4 text-slate-600 sm:text-[11px]">
-              {stat.note}
-            </p>
-          </div>
-        ))}
+        <StatCard
+          label="My Track"
+          value={student.track ?? "Not Assigned"}
+          note="Assigned training path"
+          soft="from-emerald-50 to-white"
+          border="border-emerald-100"
+          line="from-emerald-600 to-green-500"
+          valueColor="text-emerald-800"
+        />
+        <StatCard
+          label="Training Materials"
+          value={`${resourcesCount}`}
+          note="Available resources"
+          soft="from-lime-50 to-white"
+          border="border-lime-100"
+          line="from-lime-500 to-emerald-500"
+          valueColor="text-lime-700"
+        />
+        <StatCard
+          label="Assignments"
+          value={`${assignmentsCount}`}
+          note={`${unreadAssignmentsCount} unread`}
+          soft="from-green-50 to-white"
+          border="border-green-100"
+          line="from-green-600 to-emerald-600"
+          valueColor="text-green-700"
+        />
+        <StatCard
+          label="Attendance Rate"
+          value={`${metrics.attendancePercentage}%`}
+          note={`${metrics.presentCount} present • ${metrics.absentCount} absent`}
+          soft="from-emerald-50 to-lime-50"
+          border="border-emerald-100"
+          line="from-emerald-700 to-lime-500"
+          valueColor="text-emerald-800"
+        />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
@@ -186,13 +163,13 @@ export default async function StudentDashboardPage() {
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
                 Progress Overview
               </p>
-              <h3 className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
-                Recent Activity
-              </h3>
+              <h2 className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
+                Recent Student Activity
+              </h2>
             </div>
 
-            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-700">
-              Active Student
+            <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-700">
+              Active
             </span>
           </div>
 
@@ -205,7 +182,7 @@ export default async function StudentDashboardPage() {
               }
               text={
                 unreadAssignmentsCount > 0
-                  ? `You have ${unreadAssignmentsCount} new assignment${unreadAssignmentsCount === 1 ? "" : "s"} to check from your teacher.`
+                  ? `You have ${unreadAssignmentsCount} new assignment${unreadAssignmentsCount === 1 ? "" : "s"} waiting for review.`
                   : "No unread assignment is waiting for you right now."
               }
               tint={
@@ -223,8 +200,8 @@ export default async function StudentDashboardPage() {
               }
               text={
                 reviewedSubmissionsCount > 0
-                  ? `You have ${reviewedSubmissionsCount} submission review update${reviewedSubmissionsCount === 1 ? "" : "s"} available from your teacher.`
-                  : "Your submitted projects are still awaiting teacher review."
+                  ? `You have ${reviewedSubmissionsCount} reviewed submission${reviewedSubmissionsCount === 1 ? "" : "s"} available from your teacher.`
+                  : "Your submitted work is still awaiting teacher review."
               }
               tint={
                 reviewedSubmissionsCount > 0
@@ -235,7 +212,7 @@ export default async function StudentDashboardPage() {
 
             <ActivityCard
               title="Training materials available"
-              text={`You currently have ${resourcesCount} resources available for your assigned track.`}
+              text={`You currently have ${resourcesCount} materials available for your track.`}
               tint="from-emerald-50 to-white border-emerald-100"
             />
 
@@ -247,15 +224,24 @@ export default async function StudentDashboardPage() {
 
             <ActivityCard
               title="Attendance performance updated"
-              text={`Your attendance rate is ${metrics.attendancePercentage}% with ${metrics.presentCount} present record${metrics.presentCount === 1 ? "" : "s"} and ${metrics.absentCount} absent record${metrics.absentCount === 1 ? "" : "s"}.`}
+              text={`Your attendance rate is ${metrics.attendancePercentage}% with ${metrics.presentCount} present and ${metrics.absentCount} absent.`}
               tint="from-emerald-50 to-white border-emerald-100"
             />
 
-            <ActivityCard
-              title="Certificate progress updated"
-              text={`Your current certificate status is ${certificateStatus}.`}
-              tint="from-lime-50 to-white border-lime-100"
-            />
+            <div className="mt-5">
+              <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-700">
+                Quick Actions
+              </h3>
+
+              <div className="mt-2.5 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <QuickActionCard href="/student/resources" label="Materials" />
+                <QuickActionCard href="/student/assignments" label="Assignments" />
+                <QuickActionCard href="/student/submissions" label="Submissions" />
+                <QuickActionCard href="/student/attendance" label="Attendance" />
+                <QuickActionCard href="/student/certificate" label="Certificate" />
+                <QuickActionCard href="/student/profile" label="Profile" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -274,35 +260,24 @@ export default async function StudentDashboardPage() {
             </div>
           </div>
 
-          <div className="border border-emerald-200 bg-gradient-to-br from-emerald-700 via-green-600 to-lime-500 p-4 text-white shadow-[0_18px_45px_-24px_rgba(16,185,129,0.7)]">
+          <div className="border border-emerald-200 bg-gradient-to-br from-emerald-700 via-green-600 to-lime-500 p-4 text-white shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-50/90">
-              Quick Actions
+              Student Notes
             </p>
 
-            <div className="mt-3 space-y-2">
-              <ActionLink href="/student/resources" primary>
-                View Materials
-              </ActionLink>
-
-              <ActionLink href="/student/assignments">
-                View Assignments
-              </ActionLink>
-
-              <ActionLink href="/student/submissions">
-                Submit Project
-              </ActionLink>
-
-              <ActionLink href="/student/attendance">
-                Check Attendance
-              </ActionLink>
-
-              <ActionLink href="/student/certificate">
-                Check Certificate
-              </ActionLink>
-
-              <ActionLink href="/student/profile">
-                Update Profile
-              </ActionLink>
+            <div className="mt-3 space-y-2 text-xs leading-5 sm:text-sm">
+              <p className="border border-white/10 bg-white/10 px-3 py-2.5">
+                Keep up with your assignments and review updates regularly.
+              </p>
+              <p className="border border-white/10 bg-white/10 px-3 py-2.5">
+                Current attendance rate: {metrics.attendancePercentage}%.
+              </p>
+              <p className="border border-white/10 bg-white/10 px-3 py-2.5">
+                Your track: {student.track}.
+              </p>
+              <p className="border border-white/10 bg-white/10 px-3 py-2.5">
+                Certificate status: {certificateStatus}.
+              </p>
             </div>
           </div>
         </div>
@@ -311,7 +286,7 @@ export default async function StudentDashboardPage() {
   );
 }
 
-function QuickLink({
+function HeroAction({
   href,
   label,
   badge,
@@ -323,9 +298,9 @@ function QuickLink({
   return (
     <a
       href={href}
-      className="relative border border-white/20 bg-white/15 px-3 py-2 text-center text-xs font-semibold text-white backdrop-blur transition hover:bg-white/25"
+      className="relative border border-white/20 bg-white/15 px-3 py-2 text-center text-xs font-semibold text-white transition hover:bg-white/25"
     >
-      <span>{label}</span>
+      {label}
 
       {badge !== undefined && badge > 0 && (
         <span className="absolute -right-1 -top-1 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-bold text-white">
@@ -333,6 +308,44 @@ function QuickLink({
         </span>
       )}
     </a>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  note,
+  soft,
+  border,
+  line,
+  valueColor,
+}: {
+  label: string;
+  value: string | number;
+  note: string;
+  soft: string;
+  border: string;
+  line: string;
+  valueColor: string;
+}) {
+  return (
+    <div
+      className={`border bg-gradient-to-br ${soft} ${border} p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md`}
+    >
+      <div className={`h-1.5 w-16 bg-gradient-to-r ${line}`} />
+
+      <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-[11px]">
+        {label}
+      </p>
+
+      <h2 className={`mt-1 text-base font-bold sm:text-lg ${valueColor}`}>
+        {value}
+      </h2>
+
+      <p className="mt-1 text-[10px] leading-4 text-slate-600 sm:text-[11px]">
+        {note}
+      </p>
+    </div>
   );
 }
 
@@ -372,25 +385,19 @@ function SummaryRow({
   );
 }
 
-function ActionLink({
+function QuickActionCard({
   href,
-  children,
-  primary = false,
+  label,
 }: {
   href: string;
-  children: React.ReactNode;
-  primary?: boolean;
+  label: string;
 }) {
   return (
     <a
       href={href}
-      className={`block w-full px-3 py-2 text-sm font-semibold transition ${
-        primary
-          ? "bg-white text-emerald-700 hover:bg-emerald-50"
-          : "bg-white/15 text-white backdrop-blur hover:bg-white/20"
-      }`}
+      className="border border-slate-200 bg-gradient-to-br from-slate-50 to-white px-3 py-2.5 text-center text-xs font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-md"
     >
-      {children}
+      {label}
     </a>
   );
 }

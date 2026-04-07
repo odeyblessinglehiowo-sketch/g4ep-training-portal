@@ -3,16 +3,21 @@ export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { createSubmission } from "./actions";
 
-export default async function StudentSubmissionsPage() {
+const PAGE_SIZE = 8;
+
+export default async function StudentSubmissionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const page = Number(params.page ?? "1");
+
   const currentUser = await requireRole("STUDENT");
 
   const studentUser = await db.user.findUnique({
-    where: {
-      id: currentUser.userId,
-    },
-    include: {
-      student: true,
-    },
+    where: { id: currentUser.userId },
+    include: { student: true },
   });
 
   if (!studentUser || !studentUser.student) {
@@ -31,16 +36,19 @@ export default async function StudentSubmissionsPage() {
     },
   });
 
+  const totalSubmissions = await db.submission.count({
+    where: { studentId: student.id },
+  });
+
+  const totalPages = Math.max(1, Math.ceil(totalSubmissions / PAGE_SIZE));
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
+
   const submissions = await db.submission.findMany({
-    where: {
-      studentId: student.id,
-    },
-    include: {
-      assignment: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+    where: { studentId: student.id },
+    include: { assignment: true },
+    orderBy: { createdAt: "desc" },
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
   });
 
   const reviewedSubmissionsCount = await db.submission.count({
@@ -67,40 +75,50 @@ export default async function StudentSubmissionsPage() {
   });
 
   return (
-    <main className="space-y-6">
-      <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
-          Project Submission
+    <main className="space-y-4">
+      <section className="overflow-hidden border border-emerald-200 bg-gradient-to-r from-emerald-950 via-emerald-700 to-lime-500 px-4 py-3 text-white shadow-sm">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-100/90">
+          Submissions
         </p>
 
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">
+        <h1 className="mt-1 text-xl font-bold sm:text-2xl">
           My Submissions
         </h1>
 
-        <p className="mt-2 text-sm text-slate-600">
-          Submit your work using a project link or by uploading an image, video, or PDF file.
+        <p className="mt-1 text-sm text-emerald-50/90">
+          Submit projects and track teacher feedback.
         </p>
       </section>
 
-      <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <section className="border border-emerald-100 bg-white p-4 shadow-sm">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
+            New Submission
+          </p>
+
+          <h2 className="mt-1 text-lg font-bold text-slate-900">
+            Submit Project
+          </h2>
+        </div>
+
         <form
           action={createSubmission}
           encType="multipart/form-data"
-          className="grid gap-4 md:grid-cols-2"
+          className="mt-4 grid gap-3 md:grid-cols-2"
         >
           <input
             name="title"
             type="text"
             placeholder="Project Title"
-            className="rounded-lg border border-slate-300 px-4 py-2 outline-none transition focus:border-green-700"
+            className="border border-emerald-100 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-emerald-500"
           />
 
           <select
             name="assignmentId"
-            className="rounded-lg border border-slate-300 px-4 py-2 outline-none transition focus:border-green-700"
             defaultValue=""
+            className="border border-emerald-100 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-emerald-500"
           >
-            <option value="">Select Assignment (Optional)</option>
+            <option value="">Assignment (Optional)</option>
             {assignments.map((assignment) => (
               <option key={assignment.id} value={assignment.id}>
                 {assignment.title}
@@ -112,65 +130,64 @@ export default async function StudentSubmissionsPage() {
             name="fileUrl"
             type="url"
             placeholder="Project Link (optional if uploading file)"
-            className="rounded-lg border border-slate-300 px-4 py-2 outline-none transition focus:border-green-700 md:col-span-2"
+            className="border border-emerald-100 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-emerald-500 md:col-span-2"
           />
 
           <div className="md:col-span-2">
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
+            <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-600">
               Upload File
             </label>
             <input
               name="uploadFile"
               type="file"
               accept=".pdf,image/*,video/*"
-              className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none transition focus:border-green-700 file:mr-4 file:rounded-md file:border-0 file:bg-emerald-100 file:px-3 file:py-2 file:font-semibold file:text-emerald-700"
+              className="w-full border border-emerald-100 bg-white px-3 py-2.5 text-sm outline-none transition file:mr-4 file:border-0 file:bg-emerald-100 file:px-3 file:py-2 file:font-semibold file:text-emerald-700 hover:file:bg-emerald-200"
             />
-            <p className="mt-2 text-xs text-slate-500">
+            <p className="mt-2 text-[11px] text-slate-500">
               You can upload PDF, image, or video files. You can also still paste a link.
             </p>
           </div>
 
           <button
             type="submit"
-            className="md:col-span-2 rounded-lg bg-green-700 py-2 font-semibold text-white transition hover:bg-green-800 active:scale-[0.98]"
+            className="md:col-span-2 bg-emerald-700 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800"
           >
-            Submit Project
+            Submit
           </button>
         </form>
       </section>
 
       {reviewedSubmissionsCount > 0 && (
-        <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
+        <section className="border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
             Review Update
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-slate-900">
+          <h2 className="mt-1 text-lg font-bold text-slate-900">
             You have {reviewedSubmissionsCount} reviewed submission
             {reviewedSubmissionsCount === 1 ? "" : "s"}
           </h2>
 
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-slate-600">
             Your teacher has reviewed one or more of your submitted projects.
-            Check the remarks below for feedback.
           </p>
         </section>
       )}
 
-      <section className="grid gap-6">
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         {submissions.length > 0 ? (
           submissions.map((submission) => (
-            <div
+            <article
               key={submission.id}
-              className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+              className="border border-emerald-100 bg-white p-4 shadow-sm"
             >
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="text-lg font-bold text-slate-900">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-sm font-bold text-slate-900 sm:text-base">
                   {submission.title}
                 </h3>
 
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  className={`px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${
                     submission.status === "APPROVED"
                       ? "bg-green-100 text-green-700"
                       : submission.status === "REJECTED"
@@ -188,43 +205,69 @@ export default async function StudentSubmissionsPage() {
                 </p>
               )}
 
-              <p className="mt-3 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-slate-600">
                 Submitted on {new Date(submission.createdAt).toLocaleDateString()}
               </p>
 
-              <a
-                href={submission.fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-block rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800 active:scale-[0.98]"
-              >
-                View Submission
-              </a>
+              <div className="mt-3">
+                <a
+                  href={submission.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                >
+                  View Submission
+                </a>
+              </div>
 
               {submission.remark && (
                 <div
-                  className={`mt-4 rounded-2xl p-4 ${
+                  className={`mt-4 border p-3 ${
                     submission.status === "REJECTED"
-                      ? "bg-red-50 ring-1 ring-red-200"
-                      : "bg-green-50 ring-1 ring-green-200"
+                      ? "border-red-200 bg-red-50"
+                      : "border-green-200 bg-green-50"
                   }`}
                 >
-                  <p className="text-sm font-semibold text-slate-800">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-600">
                     Teacher Remark
                   </p>
 
-                  <p className="mt-2 text-sm text-slate-600">
+                  <p className="mt-2 text-sm text-slate-700 line-clamp-4">
                     {submission.remark}
                   </p>
                 </div>
               )}
-            </div>
+            </article>
           ))
         ) : (
-          <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+          <div className="col-span-2 border border-emerald-100 bg-white p-4 shadow-sm xl:col-span-4">
             <p className="text-sm text-slate-600">No submissions yet.</p>
           </div>
         )}
+      </section>
+
+      <section className="flex items-center justify-between text-sm">
+        <a
+          href={`?page=${currentPage - 1}`}
+          className={`font-medium text-slate-700 ${
+            currentPage <= 1 ? "pointer-events-none opacity-40" : ""
+          }`}
+        >
+          ← Prev
+        </a>
+
+        <span className="font-medium text-slate-700">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <a
+          href={`?page=${currentPage + 1}`}
+          className={`font-medium text-slate-700 ${
+            currentPage >= totalPages ? "pointer-events-none opacity-40" : ""
+          }`}
+        >
+          Next →
+        </a>
       </section>
     </main>
   );
