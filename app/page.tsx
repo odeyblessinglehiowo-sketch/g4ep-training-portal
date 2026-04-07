@@ -309,7 +309,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="justify-self-end rounded-[1rem] border border-white/15 bg-white/[0.01] p-2.5 shadow-2xl backdrop-blur-2xl sm:rounded-[1rem] sm:p-2 lg:max-w-[520px] lg:rounded-[2rem] lg:p-6">
+              <div className="justify-self-end rounded-[1rem] border border-white/15 bg-white/[0.01] p-2.5 shadow-2xl backdrop-blur-2xl sm:rounded-[1.5rem] sm:p-4 lg:max-w-[520px] lg:rounded-[2rem] lg:p-6">
                 <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-white sm:text-xs sm:tracking-[0.18em]">
                   Program Focus
                 </p>
