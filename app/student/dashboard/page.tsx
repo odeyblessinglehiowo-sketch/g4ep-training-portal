@@ -96,8 +96,7 @@ export default async function StudentDashboardPage() {
 </h1>
 
 <p className="mt-1 text-sm text-emerald-50/90">
-   Stay on top of your learning journey, monitor attendance, view assignments, submit projects, access materials, and track certificate progress.
-</p>
+Stay on top of your training progress from one central workspace.</p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:w-[300px]">
