@@ -91,16 +91,16 @@ function Counter({
 
 function StatCard({ item }: { item: StatItem }) {
   return (
-    <div className="rounded-[1.25rem] border border-green-100 bg-white p-4 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-6 lg:rounded-[1.75rem] lg:p-8">
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-700 ring-1 ring-green-100 sm:h-16 sm:w-16 lg:h-20 lg:w-20">
+    <div className="rounded-[1rem] border border-green-100 bg-white p-3 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-6 lg:rounded-[1.75rem] lg:p-8">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-700 ring-1 ring-green-100 sm:h-16 sm:w-16 lg:h-20 lg:w-20">
         <div className="animate-[float_3s_ease-in-out_infinite]">{item.icon}</div>
       </div>
 
-      <div className="mt-4 text-2xl font-bold tracking-tight text-black sm:mt-5 sm:text-4xl lg:mt-6 lg:text-5xl">
+      <div className="mt-3 text-2xl font-bold tracking-tight text-black sm:mt-5 sm:text-4xl lg:mt-6 lg:text-5xl">
         <Counter end={item.value} suffix={item.suffix} />
       </div>
 
-      <p className="mx-auto mt-3 max-w-xs text-[12px] leading-6 text-slate-700 sm:text-[13px] sm:leading-7 lg:mt-5 lg:text-[15px] lg:leading-9">
+      <p className="mx-auto mt-2 max-w-xs text-[11px] leading-5 text-slate-700 sm:text-[13px] sm:leading-7 lg:mt-5 lg:text-[15px] lg:leading-9">
         {item.label}
       </p>
     </div>
@@ -194,27 +194,27 @@ export default function Home() {
       suffix: "+",
       label:
         "Number of girls trained across Nigeria’s 36 states and the Federal Capital Territory",
-      icon: <Globe className="h-6 w-6 text-green-700 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />,
+      icon: <Globe className="h-5 w-5 text-green-700 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />,
     },
     {
       value: 7200,
       suffix: "+",
       label:
         "Number of Girls Re-enrolled After Dropping Out of School, Giving Them a Second Chance at Education",
-      icon: <School className="h-6 w-6 text-green-700 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />,
+      icon: <School className="h-5 w-5 text-green-700 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />,
     },
     {
       value: 2000,
       suffix: "+",
       label:
         "Number of Young Women Introduced to STEM Opportunities and Provided Intensive Training in Fields such as Cybersecurity, Software Development, and Data Analytics",
-      icon: <Monitor className="h-6 w-6 text-green-700 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />,
+      icon: <Monitor className="h-5 w-5 text-green-700 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />,
     },
     {
       value: 100,
       suffix: "+",
       label: "Number of Girls Trained in Digital Skills",
-      icon: <Code2 className="h-6 w-6 text-green-700 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />,
+      icon: <Code2 className="h-5 w-5 text-green-700 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />,
     },
   ];
 
@@ -267,24 +267,27 @@ export default function Home() {
           <div className="absolute inset-0 bg-green-950/45" />
           <div className="absolute inset-0 bg-gradient-to-r from-green-950/70 via-green-900/35 to-green-800/45" />
 
-          <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-10 lg:py-20">
-            <div className="grid grid-cols-[1.05fr_0.95fr] gap-3 items-start lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
+          <div className="relative mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-12 lg:px-10 lg:py-20">
+            <div className="grid grid-cols-[0.95fr_1.05fr] gap-2 items-start sm:gap-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
               <div className="max-w-3xl text-white">
-                <p className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-medium backdrop-blur sm:mb-4 sm:px-4 sm:py-2 sm:text-sm">
+                <p className="mb-2 inline-flex rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[9px] font-medium backdrop-blur sm:mb-4 sm:px-4 sm:py-2 sm:text-sm">
                   Akwa Ibom Digital Skills Training
                 </p>
 
-                <h1 className="text-2xl font-bold leading-tight sm:text-4xl lg:text-6xl">
-                  G4EP Project RISE
+                <h1 className="text-[18px] font-bold leading-tight sm:text-4xl lg:text-6xl">
+                  G4EP Project
                   <br />
-                  Command Center
+                  RISE
+                  <br />
+                  Command
+                  <br />
+                  Center
                 </h1>
 
-                <p className="mt-3 max-w-2xl text-[12px] leading-5 text-green-50/90 sm:mt-4 sm:text-sm sm:leading-7 lg:mt-6 lg:text-lg lg:leading-8">
+                <p className="mt-3 max-w-2xl text-[11px] leading-5 text-green-50/90 sm:mt-4 sm:text-sm sm:leading-7 lg:mt-6 lg:text-lg lg:leading-8">
                   A unified training portal for learning, project submission,
                   student progress tracking, attendance, and certification
-                  across Web Design, Photography, Videography, Graphic Design,
-                  and AI.
+                  across Web Design, Photography, Videography, Graphic Design, and AI.
                 </p>
 
                 <div className="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:flex-wrap sm:gap-3 lg:mt-8 lg:gap-4">
@@ -306,32 +309,31 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="justify-self-end rounded-[1.25rem] border border-white/15 bg-white/[0.01] p-3 shadow-2xl backdrop-blur-2xl sm:rounded-[1.5rem] sm:p-4 lg:max-w-[520px] lg:rounded-[2rem] lg:p-6">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white sm:text-xs sm:tracking-[0.18em]">
+              <div className="justify-self-end rounded-[1rem] border border-white/15 bg-white/[0.01] p-2.5 shadow-2xl backdrop-blur-2xl sm:rounded-[1.5rem] sm:p-4 lg:max-w-[520px] lg:rounded-[2rem] lg:p-6">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-white sm:text-xs sm:tracking-[0.18em]">
                   Program Focus
                 </p>
 
-                <h2 className="mt-2 text-lg font-bold leading-tight text-white sm:text-2xl lg:mt-3 lg:text-3xl">
+                <h2 className="mt-2 text-[14px] font-bold leading-tight text-white sm:text-2xl lg:mt-3 lg:text-3xl">
                   Training for impact, creativity, and career growth
                 </h2>
 
-                <div className="mt-3 grid gap-2 sm:mt-4 sm:grid-cols-2 lg:mt-6 lg:gap-4">
+                <div className="mt-3 grid gap-1.5 sm:mt-4 sm:grid-cols-2 lg:mt-6 lg:gap-4">
                   {tracks.map((track) => (
                     <div
                       key={track.name}
                       className="rounded-xl border border-white/15 bg-white/[0.05] px-3 py-2 text-white sm:rounded-2xl sm:px-4 sm:py-3 lg:px-4 lg:py-4"
                     >
-                      <p className="text-[11px] font-semibold sm:text-sm">
+                      <p className="text-[10px] font-semibold sm:text-sm">
                         {track.name}
                       </p>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-3 rounded-xl border border-dashed border-white/15 bg-white/[0.03] px-3 py-2.5 text-[11px] leading-5 text-green-50/90 sm:mt-4 sm:rounded-2xl sm:px-4 sm:py-4 sm:text-xs sm:leading-6 lg:mt-6 lg:text-sm lg:leading-7">
+                <div className="mt-3 rounded-xl border border-dashed border-white/15 bg-white/[0.03] px-3 py-2.5 text-[10px] leading-5 text-green-50/90 sm:mt-4 sm:rounded-2xl sm:px-4 sm:py-4 sm:text-xs sm:leading-6 lg:mt-6 lg:text-sm lg:leading-7">
                   This portal supports the full training journey from onboarding
-                  to resources, assignments, submissions, attendance, and
-                  certificate readiness.
+                  to resources, assignments, submissions, attendance, and certificate readiness.
                 </div>
               </div>
             </div>
@@ -377,8 +379,7 @@ export default function Home() {
                   Digital Skills
                 </h3>
                 <p className="mt-3 text-sm leading-7 text-slate-600 sm:mt-4 sm:text-base sm:leading-8">
-                  Hands-on training in web design, photography, videography, and mobile
-                  technology.
+                  Hands-on training in web design, photography, videography, and mobile technology.
                 </p>
               </div>
 
@@ -387,8 +388,7 @@ export default function Home() {
                   Inclusion & Empowerment
                 </h3>
                 <p className="mt-3 text-sm leading-7 text-slate-600 sm:mt-4 sm:text-base sm:leading-8">
-                  Focused on ensuring the girl child and vulnerable students are not
-                  left behind.
+                  Focused on ensuring the girl child and vulnerable students are not left behind.
                 </p>
               </div>
 
@@ -397,8 +397,7 @@ export default function Home() {
                   Leadership Growth
                 </h3>
                 <p className="mt-3 text-sm leading-7 text-slate-600 sm:mt-4 sm:text-base sm:leading-8">
-                  Mentorship in leadership, critical thinking, and problem-solving
-                  skills.
+                  Mentorship in leadership, critical thinking, and problem-solving skills.
                 </p>
               </div>
 
@@ -413,7 +412,7 @@ export default function Home() {
             </div>
 
             <div className="lg:col-span-2">
-              <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-4">
                 <div className="rounded-[1.5rem] border border-green-100 bg-green-50 p-5 shadow-sm sm:rounded-[2rem] sm:p-8">
                   <h3 className="text-lg font-semibold text-green-900 sm:text-2xl">
                     Student Workspace
@@ -455,9 +454,9 @@ export default function Home() {
         </section>
 
         {/* STATS */}
-        <section className="bg-[#f7faf7] py-14 sm:py-16 lg:py-20">
+        <section className="bg-[#f7faf7] py-12 sm:py-16 lg:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
-            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:gap-10 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:gap-10 xl:grid-cols-4">
               {stats.map((item, index) => (
                 <StatCard key={index} item={item} />
               ))}
@@ -653,7 +652,7 @@ export default function Home() {
         </section>
 
         {/* TESTIMONIALS */}
-        <section className="bg-[#f7faf7] py-14 sm:py-16 lg:py-20">
+        <section className="bg-[#f7faf7] py-12 sm:py-16 lg:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
             <div className="text-center">
               <h2 className="text-2xl font-semibold uppercase tracking-tight text-black sm:text-4xl lg:text-5xl">
@@ -666,14 +665,14 @@ export default function Home() {
               {testimonials.map((item) => (
                 <div
                   key={item.name}
-                  className="rounded-[1.25rem] border border-green-200 bg-white p-4 shadow-sm sm:rounded-[1.5rem] sm:p-5 lg:rounded-[1.75rem] lg:p-6"
+                  className="rounded-[1rem] border border-green-200 bg-white p-4 shadow-sm sm:rounded-[1.5rem] sm:p-5 lg:rounded-[1.75rem] lg:p-6"
                 >
-                  <p className="text-[13px] leading-7 text-black sm:text-[15px] sm:leading-8 lg:text-[18px] lg:leading-9">
+                  <p className="text-[12px] leading-6 text-black sm:text-[15px] sm:leading-8 lg:text-[18px] lg:leading-9">
                     {item.quote}
                   </p>
 
-                  <div className="mt-6 flex items-center gap-3 sm:mt-8 sm:gap-4 lg:mt-10">
-                    <div className="relative h-14 w-14 overflow-hidden rounded-full border border-green-200 sm:h-16 sm:w-16 lg:h-24 lg:w-24">
+                  <div className="mt-5 flex items-center gap-3 sm:mt-8 sm:gap-4 lg:mt-10">
+                    <div className="relative h-12 w-12 overflow-hidden rounded-full border border-green-200 sm:h-16 sm:w-16 lg:h-24 lg:w-24">
                       <Image
                         src={item.image}
                         alt={item.name}
@@ -683,10 +682,10 @@ export default function Home() {
                     </div>
 
                     <div>
-                      <h3 className="text-base font-bold text-black sm:text-lg lg:text-2xl">
+                      <h3 className="text-sm font-bold text-black sm:text-lg lg:text-2xl">
                         {item.name}
                       </h3>
-                      <p className="text-sm text-slate-400 sm:text-base lg:text-xl">
+                      <p className="text-xs text-slate-400 sm:text-base lg:text-xl">
                         {item.role}
                       </p>
                     </div>
