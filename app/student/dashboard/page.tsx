@@ -91,8 +91,11 @@ export default async function StudentDashboardPage() {
               Student Dashboard
             </p>
 
-            <h1 className="mt-1 text-xl font-bold sm:text-2xl">
-  Welcome back, {studentUser.name}
+            <h1 className="mt-1 text-xl font-bold sm:text-2xl leading-tight">
+  Welcome back,{" "}
+  <span className="text-lg sm:text-xl font-bold">
+    {studentUser.name}
+  </span>
 </h1>
 
 <p className="mt-1 text-sm text-emerald-50/90">
