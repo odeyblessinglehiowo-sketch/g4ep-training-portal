@@ -92,12 +92,12 @@ export default async function StudentDashboardPage() {
             </p>
 
             <h1 className="mt-1 text-xl font-bold sm:text-2xl">
-              Learning Command Center
-            </h1>
+  Welcome back, {studentUser.name}
+</h1>
 
-            <p className="mt-1 text-sm text-emerald-50/90">
-              Stay on top of your training progress from one central workspace.
-            </p>
+<p className="mt-1 text-sm text-emerald-50/90">
+   Stay on top of your learning journey, monitor attendance, view assignments, submit projects, access materials, and track certificate progress.
+</p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:w-[300px]">
