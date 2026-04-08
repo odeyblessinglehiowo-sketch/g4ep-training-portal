@@ -1,88 +1,98 @@
-export const dynamic = "force-dynamic";
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
+import Image from "next/image";
+import Link from "next/link";
 import { login } from "./actions";
 
-function getDefaultRedirect(role: "ADMIN" | "TEACHER" | "STUDENT") {
-  if (role === "ADMIN") return "/admin/dashboard";
-  if (role === "TEACHER") return "/teacher/dashboard";
-  return "/student/dashboard";
-}
+export const dynamic = "force-dynamic";
 
-function isSafeNext(next?: string): next is string {
-  return typeof next === "string" && next.startsWith("/");
-}
-
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    error?: string;
-    next?: string;
-  }>;
-}) {
-  const user = await getCurrentUser();
-  const params = await searchParams;
-  const error = params.error;
-  const next = params.next;
-
-  if (user) {
-    if (isSafeNext(next)) {
-      if (user.role === "STUDENT" && next.startsWith("/student")) {
-        redirect(next);
-      }
-
-      if (user.role === "TEACHER" && next.startsWith("/teacher")) {
-        redirect(next);
-      }
-
-      if (user.role === "ADMIN" && next.startsWith("/admin")) {
-        redirect(next);
-      }
-    }
-
-    redirect(getDefaultRedirect(user.role));
-  }
-
+export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-        <h1 className="text-2xl font-bold text-slate-900">Portal Login</h1>
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-lime-50">
+      {/* Wide blurred background logo */}
+      
 
-        <p className="mt-2 text-sm text-slate-600">
-          Sign in to access your dashboard.
-        </p>
+      {/* soft overlays */}
+      <div className="pointer-events-none absolute left-[-60px] top-[100px] h-40 w-40 rounded-full bg-emerald-100/60 blur-2xl" />
+      <div className="pointer-events-none absolute bottom-[80px] right-[-40px] h-48 w-48 rounded-full bg-lime-100/60 blur-2xl" />
 
-        {error && (
-          <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-sm font-medium text-red-700">{error}</p>
-          </div>
-        )}
+      <div className="relative mx-auto flex min-h-screen max-w-7xl items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md">
+          <section className="relative overflow-hidden rounded-[2rem] border border-emerald-100 bg-white/90 p-6 shadow-xl backdrop-blur sm:p-8">
+            {/* soft shape decorations */}
+            <div className="pointer-events-none absolute -left-10 -top-10 h-28 w-28 rounded-full bg-emerald-50" />
+            <div className="pointer-events-none absolute right-8 top-28 h-16 w-16 rounded-full bg-slate-100/80" />
+            <div className="pointer-events-none absolute bottom-6 right-6 h-20 w-20 rounded-full bg-lime-50/90" />
 
-        <form action={login} className="mt-6 space-y-4">
-          <input type="hidden" name="next" value={next ?? ""} />
+            <div className="relative z-10">
+              <div className="mb-6 flex justify-center">
+                <Image
+                  src="/logo/g4ep.png"
+                  alt="G4EP logo"
+                  width={72}
+                  height={72}
+                  className="h-16 w-16 object-contain"
+                />
+              </div>
 
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            className="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none transition focus:border-green-600"
-          />
+              <div className="text-center">
+                <h1 className="text-4xl font-bold leading-tight text-emerald-800 sm:text-5xl">
+                  Welcome back
+                </h1>
+                <p className="mt-2 text-base text-slate-600 sm:text-lg">
+                  Login to your account below
+                </p>
+              </div>
 
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            className="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none transition focus:border-green-600"
-          />
+              <form action={login} className="mt-8 space-y-5">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-emerald-700">
+                    Email
+                  </label>
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    className="w-full rounded-xl border border-emerald-200 bg-white px-4 py-3 text-base outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    required
+                  />
+                </div>
 
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-green-700 py-2 font-semibold text-white transition hover:bg-green-800"
-          >
-            Login
-          </button>
-        </form>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-emerald-700">
+                    Password
+                  </label>
+                  <input
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    className="w-full rounded-xl border border-emerald-200 bg-white px-4 py-3 text-base outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full rounded-xl bg-emerald-700 px-5 py-3 text-base font-semibold text-white transition hover:bg-emerald-800 active:scale-[0.99]"
+                >
+                  Login
+                </button>
+              </form>
+
+              <div className="mt-6 text-center">
+                <p className="text-sm text-slate-400">Start your application</p>
+
+                <a
+                  href="https://form.jotform.com/252385187138565"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-flex items-center gap-2 text-lg font-medium text-emerald-800 transition hover:text-emerald-600"
+                >
+                  Apply here
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </main>
   );

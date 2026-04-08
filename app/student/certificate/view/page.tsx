@@ -32,13 +32,13 @@ export default async function StudentCertificatePreviewPage() {
 
   if (!certificate || certificate.status !== "ISSUED" || !certificate.certificateId) {
     return (
-      <main className="min-h-screen bg-slate-50 px-6 py-12">
-        <div className="mx-auto max-w-4xl rounded-3xl bg-white p-10 shadow-sm ring-1 ring-slate-200">
+      <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 sm:py-12">
+        <div className="mx-auto max-w-4xl border border-emerald-100 bg-white p-6 shadow-sm sm:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
             Certificate Preview
           </p>
 
-          <h1 className="mt-3 text-3xl font-bold text-slate-900">
+          <h1 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
             Certificate not available
           </h1>
 
@@ -51,76 +51,227 @@ export default async function StudentCertificatePreviewPage() {
   }
 
   const baseUrl =
-    process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    process.env.APP_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "https://portal.geeeep.com.ng";
 
   const verificationUrl = `${baseUrl}/verify/${certificate.certificateId}`;
   const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl);
 
+  const issuedDate = certificate.issuedAt
+    ? new Date(certificate.issuedAt).toLocaleDateString()
+    : "Not issued yet";
+
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8">
-      <div className="mx-auto max-w-[1400px] space-y-5">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+    <main className="min-h-screen bg-slate-100 px-3 py-6 sm:px-4 sm:py-8">
+      <div className="mx-auto max-w-[1480px] space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-green-700">
               Certificate Preview
             </p>
-
-            <h1 className="mt-2 text-3xl font-bold text-slate-900">
+            <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
               Certificate of Completion
             </h1>
           </div>
 
-          <a
-            href="/student/certificate"
-            className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-          >
-            Back to Certificate Status
-          </a>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href="/student/certificate"
+              className="bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              Back
+            </a>
+
+            <a
+              href="/student/certificate/download"
+              className="bg-green-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800"
+            >
+              Download PDF
+            </a>
+          </div>
         </div>
 
-        <section className="relative mx-auto w-full overflow-hidden rounded-[2rem] border-[10px] border-green-800 bg-white shadow-xl aspect-[1.414/1]">
-          <div className="absolute inset-0 opacity-[0.045]">
+        {/* MOBILE */}
+        <section className="border-[6px] border-green-800 bg-white shadow-xl md:hidden">
+          <div className="relative overflow-hidden p-3">
+            {/* outer fine line */}
+            <div className="absolute inset-2 border border-emerald-200" />
+
+            {/* watermark */}
+            <div className="pointer-events-none absolute inset-0 opacity-[0.07]">
+              <div className="flex h-full items-center justify-center">
+                <img
+                  src="/logo/g4ep.png"
+                  alt="G4EP watermark"
+                  className="h-[88%] w-[88%] object-contain"
+                />
+              </div>
+            </div>
+
+            <div className="relative z-10 border border-emerald-100 px-3 py-4">
+              <div className="flex items-start justify-between gap-2">
+                <img
+                  src="/logo/g4ep.png"
+                  alt="G4EP logo"
+                  className="h-10 w-auto object-contain"
+                />
+
+                <div className="text-right">
+                  <p className="text-[9px] uppercase tracking-[0.22em] text-green-700">
+                    RISE Ttaining
+                  </p>
+                  <p className="mt-1 max-w-[140px] text-[9px] leading-4 text-slate-500">
+                    Renewed Hope for Inclusive Support and Empowerment
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 text-center">
+                <p className="text-[30px] font-semibold italic leading-none text-green-800">
+                  Certificate
+                </p>
+
+                <p className="mt-1 text-[9px] uppercase tracking-[0.32em] text-slate-500">
+                  of completion
+                </p>
+
+                <div className="mx-auto mt-3 h-px w-24 bg-emerald-200" />
+
+                <p className="mt-3 text-[11px] text-slate-600">
+                  This certificate is presented to
+                </p>
+
+                <h2 className="mt-2 text-[30px] font-bold italic leading-tight text-slate-900">
+                  {studentUser.name}
+                </h2>
+
+                <p className="mt-3 text-[11px] text-slate-600">
+                  for successfully completing the 4 weeks course in
+                </p>
+
+                <p className="mt-2 text-[13px] font-semibold uppercase tracking-[0.26em] text-[#a18c2c]">
+                  {student.track}
+                </p>
+
+                <div className="mx-auto mt-3 h-px w-24 bg-emerald-200" />
+              </div>
+
+              <div className="mt-4 grid gap-2">
+                <InfoBox label="Certificate ID" value={certificate.certificateId} />
+                <div className="grid grid-cols-2 gap-2">
+                  <InfoBox label="Track" value={student.track} />
+                  <InfoBox label="Issued Date" value={issuedDate} />
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="text-center">
+                  <img
+                    src="/signatures/g4ep-signature-1.png"
+                    alt="Signature 1"
+                    className="mx-auto h-8 w-auto object-contain"
+                  />
+                  <div className="mx-auto mt-1 w-full border-t border-slate-400 pt-1">
+                    <p className="text-[9px] font-semibold leading-tight text-slate-900">
+                      Dr. Judith Mayen Ogbara
+                    </p>
+                    <p className="mt-0.5 text-[8px] leading-tight text-slate-600">
+                      Chairman, G4EP
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <img
+                    src="/signatures/g4ep-signature-2.png"
+                    alt="Signature 2"
+                    className="mx-auto h-8 w-auto object-contain"
+                  />
+                  <div className="mx-auto mt-1 w-full border-t border-slate-400 pt-1">
+                    <p className="text-[9px] font-semibold leading-tight text-slate-900">
+                      Dr. Babajide Akinbohun
+                    </p>
+                    <p className="mt-0.5 text-[8px] leading-tight text-slate-600">
+                      Executive Director, Projects
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-end justify-center gap-3">
+                <img
+                  src="/seals/g4ep-seal.png"
+                  alt="Official seal"
+                  className="h-12 w-12 object-contain"
+                />
+
+                <div className="border border-slate-200 bg-white p-1.5 shadow-sm">
+                  <img
+                    src={qrCodeDataUrl}
+                    alt="Certificate QR Code"
+                    className="h-20 w-20"
+                  />
+                </div>
+              </div>
+
+              <p className="mt-1 text-center text-[9px] text-slate-500">
+                Scan to verify certificate
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* DESKTOP */}
+        <section className="relative hidden border-[8px] border-green-800 bg-white shadow-xl md:block">
+          {/* outer soft line */}
+          <div className="absolute inset-3 border border-emerald-200" />
+
+          {/* watermark */}
+          <div className="absolute inset-0 opacity-[0.07]">
             <div className="flex h-full items-center justify-center">
               <img
                 src="/logo/g4ep.png"
                 alt="G4EP watermark"
-                className="h-[52%] w-auto object-contain"
+                className="h-[86%] w-[86%] object-contain"
               />
             </div>
           </div>
 
-          <div className="relative z-10 flex h-full flex-col px-8 py-6 md:px-12 md:py-8">
+          <div className="relative z-10 border border-emerald-100 px-10 py-8 lg:px-12 lg:py-8">
             <div className="flex items-start justify-between gap-4">
               <img
                 src="/logo/g4ep.png"
                 alt="G4EP logo"
-                className="h-16 w-auto object-contain md:h-20"
+                className="h-16 w-auto object-contain lg:h-18"
               />
 
               <div className="text-right">
-                <p className="text-xs uppercase tracking-[0.3em] text-green-700 md:text-sm">
+                <p className="text-xs uppercase tracking-[0.3em] text-green-700 lg:text-sm">
                   Project RISE
                 </p>
-                <p className="mt-1 text-xs text-slate-500 md:text-sm">
+                <p className="mt-1 text-xs text-slate-500 lg:text-sm">
                   Renewed Hope for Inclusive Support and Empowerment
                 </p>
               </div>
             </div>
 
-            <div className="mt-4 text-center">
-              <p className="text-4xl font-semibold italic text-green-800 md:text-6xl">
+            <div className="mt-5 text-center">
+              <p className="text-5xl font-semibold italic leading-none text-green-800 lg:text-6xl">
                 Certificate
               </p>
 
-              <p className="mt-1 text-[11px] uppercase tracking-[0.38em] text-slate-500 md:text-sm">
+              <p className="mt-1 text-[11px] uppercase tracking-[0.38em] text-slate-500 lg:text-sm">
                 of completion
               </p>
+
+              <div className="mx-auto mt-4 h-px w-32 bg-emerald-200" />
 
               <p className="mt-4 text-sm text-slate-600">
                 This certificate is presented to
               </p>
 
-              <h2 className="mt-2 text-4xl font-bold italic leading-tight text-slate-900 md:text-6xl">
+              <h2 className="mt-3 text-5xl font-bold italic leading-tight text-slate-900 lg:text-6xl">
                 {studentUser.name}
               </h2>
 
@@ -128,109 +279,96 @@ export default async function StudentCertificatePreviewPage() {
                 for successfully completing the 4 weeks course in
               </p>
 
-              <p className="mt-2 text-base font-semibold uppercase tracking-[0.32em] text-[#a18c2c] md:text-lg">
+              <p className="mt-2 text-lg font-semibold uppercase tracking-[0.32em] text-[#a18c2c]">
                 {student.track}
               </p>
+
+              <div className="mx-auto mt-4 h-px w-32 bg-emerald-200" />
             </div>
 
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              <div className="rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200 md:p-4">
-                <p className="text-xs font-medium text-slate-500 md:text-sm">
-                  Certificate ID
-                </p>
-                <p className="mt-1 text-base font-bold text-slate-900 md:text-lg">
-                  {certificate.certificateId}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200 md:p-4">
-                <p className="text-xs font-medium text-slate-500 md:text-sm">
-                  Track
-                </p>
-                <p className="mt-1 text-base font-bold text-slate-900 md:text-lg">
-                  {student.track}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200 md:p-4">
-                <p className="text-xs font-medium text-slate-500 md:text-sm">
-                  Issued Date
-                </p>
-                <p className="mt-1 text-base font-bold text-slate-900 md:text-lg">
-                  {certificate.issuedAt
-                    ? new Date(certificate.issuedAt).toLocaleDateString()
-                    : "Not issued yet"}
-                </p>
-              </div>
+            <div className="mt-6 grid gap-3 lg:grid-cols-3">
+              <InfoBox label="Certificate ID" value={certificate.certificateId} large />
+              <InfoBox label="Track" value={student.track} large />
+              <InfoBox label="Issued Date" value={issuedDate} large />
             </div>
 
-            <div className="mt-auto grid gap-4 md:grid-cols-3 md:items-end">
+            <div className="mt-8 grid items-end gap-6 lg:grid-cols-[1fr_auto_1fr]">
               <div className="text-center">
                 <img
                   src="/signatures/g4ep-signature-1.png"
                   alt="Signature 1"
-                  className="mx-auto h-12 w-auto object-contain md:h-14"
+                  className="mx-auto h-12 w-auto object-contain"
                 />
-                <div className="mx-auto mt-1 w-44 border-t border-slate-400 pt-1">
-                  <p className="text-[11px] font-semibold leading-tight text-slate-900 md:text-xs">
+                <div className="mx-auto mt-1 w-52 border-t border-slate-400 pt-1">
+                  <p className="text-[11px] font-semibold leading-tight text-slate-900">
                     Dr. Judith Mayen Ogbara
                   </p>
-                  <p className="mt-0.5 text-[10px] leading-tight text-slate-600 md:text-[11px]">
+                  <p className="mt-0.5 text-[10px] leading-tight text-slate-600">
                     Chairman, G4EP
                   </p>
                 </div>
               </div>
 
-              <div className="text-center">
+              <div className="flex flex-col items-center">
                 <img
                   src="/seals/g4ep-seal.png"
                   alt="Official seal"
-                  className="mx-auto h-16 w-16 object-contain md:h-20 md:w-20"
+                  className="h-14 w-14 object-contain lg:h-16 lg:w-16"
                 />
+
+                <div className="mt-2 border border-slate-200 bg-white p-2 shadow-sm">
+                  <img
+                    src={qrCodeDataUrl}
+                    alt="Certificate QR Code"
+                    className="h-24 w-24 lg:h-26 lg:w-26"
+                  />
+                </div>
+
+                <p className="mt-2 text-[10px] text-slate-500 lg:text-xs">
+                  Scan to verify certificate
+                </p>
               </div>
 
               <div className="text-center">
                 <img
                   src="/signatures/g4ep-signature-2.png"
                   alt="Signature 2"
-                  className="mx-auto h-12 w-auto object-contain md:h-14"
+                  className="mx-auto h-12 w-auto object-contain"
                 />
-                <div className="mx-auto mt-1 w-48 border-t border-slate-400 pt-1">
-                  <p className="text-[11px] font-semibold leading-tight text-slate-900 md:text-xs">
+                <div className="mx-auto mt-1 w-56 border-t border-slate-400 pt-1">
+                  <p className="text-[11px] font-semibold leading-tight text-slate-900">
                     Dr. Babajide Akinbohun
                   </p>
-                  <p className="mt-0.5 text-[10px] leading-tight text-slate-600 md:text-[11px]">
+                  <p className="mt-0.5 text-[10px] leading-tight text-slate-600">
                     Executive Director, Projects
                   </p>
                 </div>
               </div>
             </div>
-
-            <div className="mt-3 flex flex-col items-center">
-              <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
-                <img
-                  src={qrCodeDataUrl}
-                  alt="Certificate QR Code"
-                  className="h-20 w-20 md:h-24 md:w-24"
-                />
-              </div>
-
-              <p className="mt-1 text-[10px] text-slate-500 md:text-xs">
-                Scan to verify certificate
-              </p>
-            </div>
           </div>
         </section>
-
-        <div className="flex justify-center">
-          <a
-            href="/student/certificate/download"
-            className="rounded-xl bg-green-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-green-800"
-          >
-            Download PDF
-          </a>
-        </div>
       </div>
     </main>
+  );
+}
+
+function InfoBox({
+  label,
+  value,
+  large = false,
+}: {
+  label: string;
+  value: string;
+  large?: boolean;
+}) {
+  return (
+    <div className="border border-slate-200 bg-slate-50 p-3 lg:p-4">
+      <p className={`font-medium text-slate-500 ${large ? "text-sm" : "text-[11px]"}`}>
+        {label}
+      </p>
+      <p className={`mt-1 font-bold text-slate-900 ${large ? "text-lg" : "text-sm"}`}>
+        {value}
+      </p>
+    </div>
   );
 }

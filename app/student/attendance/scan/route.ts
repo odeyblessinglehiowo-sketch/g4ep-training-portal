@@ -17,11 +17,15 @@ function getBaseUrl(request: Request) {
     return `${protocol}://${host}`;
   }
 
-  return process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://portal.geeeep.com.ng";
+  return (
+    process.env.APP_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "https://portal.geeeep.com.ng"
+  );
 }
 
-function buildResultUrl(request: Request, params: Record<string, string>) {
-  const url = new URL("/student/attendance/scan/result", getBaseUrl(request));
+function buildAttendanceUrl(request: Request, params: Record<string, string>) {
+  const url = new URL("/student/attendance", getBaseUrl(request));
 
   Object.entries(params).forEach(([key, value]) => {
     url.searchParams.set(key, value);
@@ -44,7 +48,7 @@ export async function GET(request: Request) {
 
   if (!code) {
     return NextResponse.redirect(
-      buildResultUrl(request, {
+      buildAttendanceUrl(request, {
         status: "error",
         message: "Attendance QR code is missing or invalid.",
       })
@@ -66,7 +70,7 @@ export async function GET(request: Request) {
 
   if (user.role !== "STUDENT") {
     return NextResponse.redirect(
-      buildResultUrl(request, {
+      buildAttendanceUrl(request, {
         status: "error",
         message: "Only students can mark attendance with this QR code.",
       })
@@ -84,10 +88,9 @@ export async function GET(request: Request) {
     revalidatePath("/admin/dashboard");
 
     return NextResponse.redirect(
-      buildResultUrl(request, {
+      buildAttendanceUrl(request, {
         status: "success",
-        title: result.sessionTitle,
-        time: result.checkedInAt,
+        message: `Attendance recorded successfully for ${result.sessionTitle}.`,
       })
     );
   } catch (error) {
@@ -97,7 +100,7 @@ export async function GET(request: Request) {
         : "Attendance could not be marked.";
 
     return NextResponse.redirect(
-      buildResultUrl(request, {
+      buildAttendanceUrl(request, {
         status: "error",
         message,
       })

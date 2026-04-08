@@ -8,11 +8,16 @@ const PAGE_SIZE = 8;
 export default async function StudentAttendancePage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{
+  page?: string;
+  status?: string;
+  message?: string;
+}>;
 }) {
   const params = await searchParams;
   const page = Number(params.page ?? "1");
-
+const status = params.status;
+const message = params.message;
   const currentUser = await requireRole("STUDENT");
 
   await syncExpiredAttendanceSessions();
@@ -104,7 +109,25 @@ export default async function StudentAttendancePage({
             </div>
           </div>
         </section>
+{message && (
+  <section
+    className={`border p-3 shadow-sm ${
+      status === "success"
+        ? "border-emerald-200 bg-emerald-50"
+        : "border-red-200 bg-red-50"
+    }`}
+  >
+    <p
+      className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${
+        status === "success" ? "text-emerald-700" : "text-red-700"
+      }`}
+    >
+      {status === "success" ? "Attendance Successful" : "Attendance Error"}
+    </p>
 
+    <p className="mt-1 text-sm text-slate-700">{message}</p>
+  </section>
+)}
         <section className="border border-emerald-100 bg-white p-4 shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
             Attendance Overview
